@@ -1474,10 +1474,16 @@ function saveGASUrl(val) {
 
 function loadGASUrl() {
   const saved = _load('campusai_gas_url', '');
-  if (saved) {
-    window.GAS_URL_OVERRIDE = saved;
+  const active = saved || GAS_URL; // always fall back to hardcoded constant
+  if (active) {
+    window.GAS_URL_OVERRIDE = active;
     const inp = document.getElementById('gas-url-input');
-    if (inp) inp.value = saved;
+    if (inp) inp.value = active;
+    const status = document.getElementById('gas-url-status');
+    if (status) {
+      status.textContent = saved ? '✅ Custom URL active' : '✅ Using built-in URL';
+      status.style.color = 'var(--green)';
+    }
   }
 }
 
