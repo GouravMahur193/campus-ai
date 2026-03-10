@@ -1321,7 +1321,7 @@ let selectedCat = null;
 
 const SHEET_ID = '1IOCuN6iHKFGMc7Lrej56miU3w6ZVRL0IG2a3RT2kra4';
 // ↓ Paste your deployed Apps Script URL here after setup
-const GAS_URL = '';  // e.g. 'https://script.google.com/macros/s/ABC123/exec'
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxGLNwCRXro7CYnsn7RdzzvAeGI7yELFCKLzAp3U03_0HQ0aWzpDHoY6tXOaASycfD8Pw/exec';
 
 // ══════════════════════════════════════════
 // STORAGE HELPERS
@@ -1474,16 +1474,14 @@ function saveGASUrl(val) {
 
 function loadGASUrl() {
   const saved = _load('campusai_gas_url', '');
-  const active = saved || GAS_URL; // always fall back to hardcoded constant
-  if (active) {
-    window.GAS_URL_OVERRIDE = active;
-    const inp = document.getElementById('gas-url-input');
-    if (inp) inp.value = active;
-    const status = document.getElementById('gas-url-status');
-    if (status) {
-      status.textContent = saved ? '✅ Custom URL active' : '✅ Using built-in URL';
-      status.style.color = 'var(--green)';
-    }
+  const active = saved || GAS_URL;
+  window.GAS_URL_OVERRIDE = active; // always set, even if empty string
+  const inp = document.getElementById('gas-url-input');
+  if (inp) inp.value = active;
+  const status = document.getElementById('gas-url-status');
+  if (status && active) {
+    status.textContent = saved ? '✅ Custom URL active' : '✅ Using built-in Apps Script URL';
+    status.style.color = 'var(--green)';
   }
 }
 
@@ -1496,6 +1494,7 @@ async function fetchTimetable() {
 
   // ── Try Apps Script JSON endpoint first (most reliable) ──
   const activeGASUrl = window.GAS_URL_OVERRIDE || GAS_URL;
+  console.log('[CampusAI] Using GAS URL:', activeGASUrl ? activeGASUrl.substring(0,60)+'...' : 'NONE');
   if (activeGASUrl) {
     try {
       const resp = await fetch(activeGASUrl);
