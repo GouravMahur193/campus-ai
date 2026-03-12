@@ -3,3160 +3,690 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CampusAI — Smart Student Companion</title>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<title>StudyAI — Learn Anything, 6 Ways</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #07080f;
-  --surface: #0f1018;
-  --surface2: #161721;
-  --surface3: #1e2030;
+  --bg: #080b14;
+  --surface: #0e1420;
+  --surface2: #141a28;
+  --surface3: #1a2235;
   --border: rgba(255,255,255,0.07);
   --border2: rgba(255,255,255,0.12);
-  --accent: #4f8eff;
-  --accent-glow: rgba(79,142,255,0.15);
-  --green: #3dffa0;
-  --green-glow: rgba(61,255,160,0.12);
-  --pink: #ff4f8e;
-  --pink-glow: rgba(255,79,142,0.12);
-  --amber: #ffb84f;
-  --amber-glow: rgba(255,184,79,0.12);
-  --text: #e8eaf6;
-  --muted: #6b6f8a;
-  --radius: 14px;
+  --text: #e8edf5;
+  --muted: #6b7a99;
+  --accent: #4e7cff;
+  --accent2: #7c4eff;
+  --green: #2dd4a0;
+  --amber: #f5a623;
+  --pink: #ff4e8e;
+  --eli5: #2dd4a0;
+  --academic: #4e7cff;
+  --practical: #f5a623;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
 }
-body::before {
-  content:'';
-  position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(79,142,255,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 85% 90%, rgba(255,79,142,0.06) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(61,255,160,0.03) 0%, transparent 70%);
+
+/* ── BACKGROUND ── */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(78,124,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(78,124,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
 }
-/* noise grain */
-body::after {
-  content:'';
-  position:fixed; inset:0; pointer-events:none; z-index:0;
-  opacity:.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 200px;
+.bg-glow1 {
+  position: fixed; top: -200px; left: -200px;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(78,124,255,0.08) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.bg-glow2 {
+  position: fixed; bottom: -200px; right: -100px;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,78,255,0.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
 }
 
-/* ══════════════════ AUTH ══════════════════ */
-#auth-screen {
-  position:fixed; inset:0; z-index:200;
-  display:flex; align-items:center; justify-content:center;
-  padding:20px;
-}
-.auth-wrap {
-  width:100%; max-width:460px;
-  animation: slideUp .5s cubic-bezier(.16,1,.3,1);
-}
-.auth-logo-row {
-  text-align:center; margin-bottom:32px;
-}
-.auth-logo {
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:32px; font-weight:800; letter-spacing:-.5px;
-  background: linear-gradient(135deg, var(--accent), var(--green));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
-.auth-sub { color:var(--muted); font-size:14px; margin-top:4px; }
-
-.auth-card {
-  background:var(--surface);
-  border:1px solid var(--border2);
-  border-radius:20px;
-  padding:32px;
-  box-shadow: 0 40px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
-}
-.auth-tabs {
-  display:flex; background:var(--bg); border-radius:10px;
-  padding:3px; margin-bottom:24px; gap:3px;
-}
-.auth-tab {
-  flex:1; padding:9px; border:none; border-radius:8px;
-  background:transparent; color:var(--muted);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:14px; font-weight:600;
-  cursor:pointer; transition:all .2s;
-}
-.auth-tab.active { background:var(--surface2); color:var(--text); }
-
-.form-group { margin-bottom:14px; }
-.form-label {
-  display:block; font-size:11px; font-weight:700; letter-spacing:.08em;
-  text-transform:uppercase; color:var(--muted); margin-bottom:6px;
-}
-.form-input, .form-select {
-  width:100%; padding:11px 14px;
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; color:var(--text);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:14px;
-  outline:none; transition:border-color .2s; appearance:none;
-}
-.form-input:focus, .form-select:focus { border-color:var(--accent); }
-.form-input::placeholder { color:var(--muted); }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-
-/* subject basket checkboxes */
-.subject-basket {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; padding:12px; max-height:180px; overflow-y:auto;
-  display:none; margin-top:4px;
-}
-.subject-basket.visible { display:block; }
-.subject-basket::-webkit-scrollbar { width:4px; }
-.subject-basket::-webkit-scrollbar-track { background:transparent; }
-.subject-basket::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
-
-.subject-item {
-  display:flex; align-items:center; gap:10px;
-  padding:8px 4px; border-bottom:1px solid var(--border); cursor:pointer;
-}
-.subject-item:last-child { border-bottom:none; }
-.subject-item input[type=checkbox] { accent-color:var(--accent); width:15px; height:15px; cursor:pointer; }
-.subject-code { font-size:12px; font-weight:700; color:var(--accent); min-width:70px; }
-.subject-name { font-size:12px; color:var(--muted); }
-.basket-note { font-size:11px; color:var(--muted); margin-bottom:8px; font-style:italic; }
-
-.btn {
-  width:100%; padding:13px;
-  background:linear-gradient(135deg, var(--accent), #2563eb);
-  border:none; border-radius:10px;
-  color:#fff; font-family:'Cabinet Grotesk',sans-serif;
-  font-size:15px; font-weight:700; cursor:pointer;
-  transition:opacity .2s, transform .15s;
-  margin-top:6px; letter-spacing:.01em;
-}
-.btn:hover { opacity:.9; transform:translateY(-1px); }
-.btn:active { transform:translateY(0); }
-
-.auth-error {
-  background:rgba(255,79,142,.1); border:1px solid rgba(255,79,142,.3);
-  color:var(--pink); border-radius:8px; padding:10px 12px;
-  font-size:13px; margin-top:10px; display:none;
+/* ── LAYOUT ── */
+.container {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 0 20px 80px;
 }
 
-/* ══════════════════ APP SHELL ══════════════════ */
-#app { display:none; position:relative; z-index:1; min-height:100vh; }
-
+/* ── HEADER ── */
 .header {
-  position:sticky; top:0; z-index:50;
-  height:58px;
-  background:rgba(7,8,15,.85);
-  backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 24px;
+  padding: 48px 0 40px;
+  text-align: center;
 }
-.header-left { display:flex; align-items:center; gap:14px; }
-.header-logo {
-  font-family:'Cabinet Grotesk',sans-serif; font-size:19px; font-weight:800;
-  background:linear-gradient(135deg,var(--accent),var(--green));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  letter-spacing:-.3px;
+.header-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(78,124,255,0.1); border: 1px solid rgba(78,124,255,0.2);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 11px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 20px;
 }
-.header-badge {
-  background:var(--surface2); border:1px solid var(--border);
-  padding:3px 10px; border-radius:20px; font-size:11px; color:var(--muted);
-  font-weight:600;
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.5));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
 }
-.header-right { display:flex; align-items:center; gap:10px; }
-.user-chip {
-  display:flex; align-items:center; gap:8px;
-  background:var(--surface2); border:1px solid var(--border);
-  padding:5px 12px 5px 5px; border-radius:20px;
+.header-title span {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-.user-av {
-  width:26px; height:26px; border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),var(--green));
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:800; color:#fff;
-}
-.user-name { font-size:12px; font-weight:600; color:var(--text); }
-.btn-sm {
-  padding:6px 14px; background:transparent;
-  border:1px solid var(--border); border-radius:8px;
-  color:var(--muted); font-size:12px; font-family:'Cabinet Grotesk',sans-serif;
-  cursor:pointer; transition:all .2s; font-weight:600;
-}
-.btn-sm:hover { border-color:var(--pink); color:var(--pink); }
-
-/* REFRESH INDICATOR */
-.refresh-bar {
-  height:2px; background:var(--border);
-  position:relative; overflow:hidden;
-}
-.refresh-progress {
-  height:100%; background:linear-gradient(90deg,var(--accent),var(--green));
-  width:0%; transition:width .5s ease;
+.header-sub {
+  font-size: 16px; color: var(--muted); font-weight: 300;
+  max-width: 480px; margin: 0 auto; line-height: 1.6;
 }
 
-/* NAV TABS */
-.nav {
-  display:flex; gap:0; padding:0 24px;
-  border-bottom:1px solid var(--border);
-  overflow-x:auto; background:var(--surface);
+/* ── CAPABILITY PILLS ── */
+.caps {
+  display: flex; gap: 10px; justify-content: center;
+  flex-wrap: wrap; margin-top: 24px;
 }
-.nav::-webkit-scrollbar { display:none; }
-.nav-tab {
-  padding:14px 20px; background:transparent; border:none;
-  border-bottom:2px solid transparent; color:var(--muted);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:14px; font-weight:600;
-  cursor:pointer; transition:all .2s; white-space:nowrap;
-  display:flex; align-items:center; gap:8px;
+.cap-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 500; color: var(--muted);
 }
-.nav-tab:hover { color:var(--text); }
-.nav-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-.nav-icon { font-size:15px; }
-.nav-pill {
-  background:var(--accent); color:#fff;
-  font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px;
-  min-width:18px; text-align:center;
-}
+.cap-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* CONTENT */
-.content { padding:24px; max-width:1000px; margin:0 auto; }
-.panel { display:none; animation:fadeIn .3s ease; }
-.panel.active { display:block; }
+/* ── INPUT CARD ── */
+.input-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px; padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.input-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
+}
+.input-wrap {
+  position: relative;
+}
+textarea {
+  width: 100%; background: var(--surface2);
+  border: 1px solid var(--border2); border-radius: 14px;
+  padding: 16px 18px; font-family: 'DM Sans', sans-serif;
+  font-size: 15px; color: var(--text); resize: none;
+  min-height: 120px; outline: none; transition: border-color .2s;
+  line-height: 1.6;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
 
-/* ══════════════════ TODAY PANEL ══════════════════ */
-.today-hero {
-  display:flex; align-items:flex-start; justify-content:space-between;
-  margin-bottom:24px; flex-wrap:wrap; gap:16px;
+.input-footer {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-top: 14px;
+  flex-wrap: wrap; gap: 12px;
 }
-.today-date-block {}
-.today-greeting {
-  font-size:13px; color:var(--muted); font-weight:600;
-  text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;
+.mode-tabs {
+  display: flex; gap: 6px;
 }
-.today-date-big {
-  font-family:'Cabinet Grotesk',sans-serif; font-size:28px; font-weight:800;
-  letter-spacing:-.5px;
+.mode-tab {
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
 }
-.today-sub { font-size:13px; color:var(--muted); margin-top:3px; }
+.mode-tab.active {
+  background: rgba(78,124,255,0.15);
+  border-color: var(--accent); color: var(--accent);
+}
+.mode-tab:hover:not(.active) { border-color: var(--border2); color: var(--text); }
 
-.next-class-card {
-  background:linear-gradient(135deg, rgba(79,142,255,.12), rgba(61,255,160,.08));
-  border:1px solid rgba(79,142,255,.25);
-  border-radius:var(--radius); padding:16px 20px;
-  min-width:220px; position:relative; overflow:hidden;
+.analyze-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 12px;
+  padding: 12px 24px; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700; color: #fff;
+  cursor: pointer; transition: all .25s;
+  box-shadow: 0 8px 24px rgba(78,124,255,0.3);
 }
-.next-class-card::before {
-  content:''; position:absolute; top:-20px; right:-20px;
-  width:80px; height:80px; border-radius:50%;
-  background:radial-gradient(circle, rgba(79,142,255,.2), transparent);
+.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(78,124,255,0.4); }
+.analyze-btn:active { transform: translateY(0); }
+.analyze-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .7s linear infinite; display: none;
 }
-.ncl { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.08em; }
-.ncl-subject { font-size:18px; font-weight:800; margin:4px 0 2px; letter-spacing:-.3px; }
-.ncl-meta { font-size:12px; color:var(--muted); }
-.ncl-time { font-size:22px; font-weight:800; color:var(--green); letter-spacing:-.5px; }
-.ncl-countdown { font-size:11px; color:var(--muted); }
+.analyze-btn.loading .btn-spinner { display: block; }
+.analyze-btn.loading .btn-text { opacity: .7; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* TIMELINE */
-.timeline { display:flex; flex-direction:column; gap:0; }
-.tl-item {
-  display:grid; grid-template-columns:90px 20px 1fr;
-  gap:0 14px; min-height:70px;
-}
-.tl-time {
-  font-size:11px; font-weight:700; color:var(--muted);
-  padding-top:18px; text-align:right; line-height:1.4;
-}
-.tl-spine { display:flex; flex-direction:column; align-items:center; }
-.tl-dot {
-  width:12px; height:12px; border-radius:50%; flex-shrink:0;
-  margin-top:16px; transition:all .3s; z-index:1;
-}
-.tl-dot.past { background:var(--surface3); border:2px solid var(--muted); }
-.tl-dot.now { background:var(--green); box-shadow:0 0 12px var(--green), 0 0 24px rgba(61,255,160,.3); border:2px solid var(--green); animation:pulse 2s infinite; }
-.tl-dot.upcoming { background:var(--accent); border:2px solid var(--accent); }
-.tl-dot.free { background:var(--surface3); border:2px dashed var(--border2); }
-.tl-line { flex:1; width:1px; background:var(--border); margin-top:4px; }
-.tl-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:12px 16px; margin:8px 0;
-  transition:all .2s; position:relative; overflow:hidden;
-}
-.tl-card::before {
-  content:''; position:absolute; left:0; top:0; bottom:0;
-  width:3px; border-radius:3px 0 0 3px;
-}
-.tl-card.now { border-color:rgba(61,255,160,.3); background:rgba(61,255,160,.04); }
-.tl-card.now::before { background:var(--green); }
-.tl-card.upcoming::before { background:var(--accent); }
-.tl-card.past { opacity:.45; }
-.tl-card.past::before { background:var(--muted); }
-.tl-card.free { background:transparent; border-style:dashed; }
-.tl-card.free::before { display:none; }
-.tl-subject { font-size:15px; font-weight:700; letter-spacing:-.2px; margin-bottom:4px; }
-.tl-details { display:flex; gap:14px; flex-wrap:wrap; }
-.tl-chip {
-  display:flex; align-items:center; gap:4px;
-  font-size:11px; color:var(--muted); font-weight:600;
-}
-.tl-chip svg { width:12px; height:12px; }
-.tl-status {
-  position:absolute; right:12px; top:12px;
-  font-size:10px; font-weight:800; text-transform:uppercase;
-  padding:3px 8px; border-radius:20px; letter-spacing:.06em;
-}
-.status-now { background:rgba(61,255,160,.15); color:var(--green); }
-.status-next { background:rgba(79,142,255,.15); color:var(--accent); }
-.status-done { background:rgba(107,111,138,.1); color:var(--muted); }
-.status-lunch { background:rgba(255,184,79,.12); color:var(--amber); }
-.tl-free-text { font-size:13px; color:var(--muted); padding:14px 0; font-style:italic; }
+/* ── RESULTS ── */
+#results { display: none; }
+#results.show { display: block; animation: fadeUp .5s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
-.empty-day {
-  text-align:center; padding:60px 20px;
-  color:var(--muted);
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; margin-top: 32px;
 }
-.empty-day .emoji { font-size:52px; display:block; margin-bottom:12px; }
-.empty-day p { font-size:16px; font-weight:600; }
-.empty-day small { font-size:13px; opacity:.6; }
-
-/* ══════════════════ EXPENSE PANEL ══════════════════ */
-.expense-layout {
-  display:grid; grid-template-columns:1fr 340px;
-  gap:20px; align-items:start;
+.section-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
 }
-@media(max-width:720px) { .expense-layout { grid-template-columns:1fr; } }
-
 .section-title {
-  font-family:'Cabinet Grotesk',sans-serif; font-size:18px; font-weight:800;
-  letter-spacing:-.3px; margin-bottom:16px;
-  display:flex; align-items:center; gap:8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700;
+}
+.section-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* ── 3-PERSPECTIVE GRID ── */
+.perspectives-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 8px;
+}
+@media(max-width: 700px) { .perspectives-grid { grid-template-columns: 1fr; } }
+
+.perspective-card {
+  background: var(--surface); border-radius: 16px;
+  border: 1px solid var(--border); overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.perspective-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+.pc-header {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.pc-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.pc-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+}
+.pc-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.pc-body {
+  padding: 16px 18px;
+  font-size: 14px; line-height: 1.7; color: var(--text);
+  min-height: 160px;
+}
+.pc-body.loading {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
 }
 
-.quick-add-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; margin-bottom:16px;
-}
-.amount-input-wrap {
-  position:relative; margin-bottom:14px;
-}
-.amount-prefix {
-  position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  font-size:22px; font-weight:800; color:var(--muted);
-}
-.amount-input {
-  width:100%; padding:14px 14px 14px 38px;
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; color:var(--text);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:24px; font-weight:800;
-  outline:none; transition:border-color .2s;
-}
-.amount-input:focus { border-color:var(--accent); }
-.amount-input::placeholder { color:var(--surface3); }
-.cat-grid {
-  display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px;
-}
-.cat-btn {
-  padding:10px 6px; background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; color:var(--muted); cursor:pointer;
-  font-family:'Cabinet Grotesk',sans-serif; font-size:11px; font-weight:600;
-  transition:all .2s; text-align:center; display:flex; flex-direction:column;
-  align-items:center; gap:4px;
-}
-.cat-btn .cat-icon { font-size:18px; }
-.cat-btn.selected { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
-.desc-input {
-  width:100%; padding:10px 14px;
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; color:var(--text);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:13px;
-  outline:none; transition:border-color .2s; margin-bottom:12px;
-}
-.desc-input:focus { border-color:var(--accent); }
-.desc-input::placeholder { color:var(--muted); }
-.add-btn {
-  width:100%; padding:12px;
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  border:none; border-radius:9px; color:#fff;
-  font-family:'Cabinet Grotesk',sans-serif; font-size:14px; font-weight:700;
-  cursor:pointer; transition:all .2s;
-}
-.add-btn:hover { opacity:.9; }
+/* Card accent colors */
+.pc-eli5   { border-top: 2px solid var(--eli5); }
+.pc-academic { border-top: 2px solid var(--academic); }
+.pc-practical { border-top: 2px solid var(--practical); }
+.pc-eli5   .pc-icon { background: rgba(45,212,160,.12); }
+.pc-academic .pc-icon { background: rgba(78,124,255,.12); }
+.pc-practical .pc-icon { background: rgba(245,166,35,.12); }
+.pc-eli5   .pc-label { color: var(--eli5); }
+.pc-academic .pc-label { color: var(--academic); }
+.pc-practical .pc-label { color: var(--practical); }
 
-/* AI POPUP */
-.ai-popup {
-  position:fixed; bottom:24px; right:24px; z-index:300;
-  width:320px; background:var(--surface);
-  border:1px solid rgba(79,142,255,.3);
-  border-radius:16px; padding:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(79,142,255,.1);
-  display:none;
-  animation:slideUp .4s cubic-bezier(.16,1,.3,1);
+/* ── COMPRESSION CARDS ── */
+.compression-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
-.ai-popup.show { display:block; }
-.ai-popup-header {
-  display:flex; align-items:center; gap:10px; margin-bottom:12px;
-}
-.ai-avatar {
-  width:32px; height:32px; border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),var(--green));
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px; flex-shrink:0;
-}
-.ai-name { font-size:12px; font-weight:800; color:var(--accent); }
-.ai-sub { font-size:11px; color:var(--muted); }
-.ai-msg { font-size:13px; color:var(--text); line-height:1.5; margin-bottom:12px; }
-.ai-input {
-  width:100%; padding:9px 12px;
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:8px; color:var(--text);
-  font-family:'Cabinet Grotesk',sans-serif; font-size:13px;
-  outline:none; margin-bottom:10px;
-}
-.ai-input:focus { border-color:var(--accent); }
-.ai-btn-row { display:flex; gap:8px; }
-.ai-btn {
-  flex:1; padding:8px; border-radius:7px; border:none; cursor:pointer;
-  font-family:'Cabinet Grotesk',sans-serif; font-size:12px; font-weight:700;
-  transition:all .2s;
-}
-.ai-btn.primary { background:var(--accent); color:#fff; }
-.ai-btn.secondary { background:var(--surface2); border:1px solid var(--border); color:var(--muted); }
-.ai-btn.primary:hover { opacity:.9; }
-.ai-btn.secondary:hover { color:var(--text); }
-.ai-amount-display {
-  background:var(--surface2); border-radius:8px; padding:10px 12px;
-  margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;
-}
-.ai-amount { font-size:20px; font-weight:800; color:var(--green); }
-.ai-source { font-size:11px; color:var(--muted); }
+@media(max-width: 600px) { .compression-grid { grid-template-columns: 1fr; } }
 
-/* EXPENSE LIST */
-.expense-list { display:flex; flex-direction:column; gap:8px; }
-.expense-item {
-  display:flex; align-items:center; gap:12px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:10px; padding:12px 16px;
-  animation:fadeIn .3s ease;
+.comp-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; overflow: hidden;
 }
-.exp-icon {
-  width:38px; height:38px; border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; flex-shrink:0;
-}
-.exp-info { flex:1; }
-.exp-desc { font-size:14px; font-weight:600; }
-.exp-meta { font-size:11px; color:var(--muted); margin-top:2px; }
-.exp-amount { font-size:16px; font-weight:800; color:var(--pink); }
-.exp-del {
-  background:transparent; border:none; color:var(--muted);
-  cursor:pointer; font-size:16px; padding:4px; line-height:1;
-  transition:color .2s; border-radius:5px;
-}
-.exp-del:hover { color:var(--pink); background:var(--pink-glow); }
-
-/* TELEGRAM CARD */
-.tg-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px;
-}
-.tg-header {
-  display:flex; align-items:center; gap:10px; margin-bottom:12px;
-}
-.tg-icon {
-  width:40px; height:40px; border-radius:10px;
-  background:linear-gradient(135deg,#2196f3,#0d47a1);
-  display:flex; align-items:center; justify-content:center; font-size:20px;
-}
-.tg-title { font-size:15px; font-weight:800; }
-.tg-sub { font-size:12px; color:var(--muted); }
-.tg-steps { list-style:none; counter-reset:step; }
-.tg-steps li {
-  counter-increment:step; padding:8px 0; border-bottom:1px solid var(--border);
-  font-size:13px; color:var(--muted); display:flex; align-items:flex-start; gap:10px;
-  line-height:1.5;
-}
-.tg-steps li:last-child { border-bottom:none; }
-.tg-steps li::before {
-  content:counter(step);
-  min-width:20px; height:20px; border-radius:50%;
-  background:var(--accent); color:#fff;
-  font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; margin-top:1px;
-}
-.tg-btn {
-  display:block; width:100%; padding:11px;
-  background:linear-gradient(135deg,#2196f3,#0d47a1);
-  border:none; border-radius:9px; color:#fff; margin-top:14px;
-  font-family:'Cabinet Grotesk',sans-serif; font-size:13px; font-weight:700;
-  cursor:pointer; text-align:center; text-decoration:none;
-  transition:opacity .2s;
-}
-.tg-btn:hover { opacity:.9; }
-
-/* SMS SIMULATOR */
-.sms-sim-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; margin-top:16px;
-}
-.sms-sim-header {
-  font-size:13px; font-weight:700; color:var(--amber); margin-bottom:10px;
-  display:flex; align-items:center; gap:6px;
-}
-.sms-templates { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
-.sms-tmpl {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:8px; padding:10px 12px; font-size:11px; color:var(--muted);
-  cursor:pointer; transition:all .2s; line-height:1.5;
-  font-family:monospace;
-}
-.sms-tmpl:hover { border-color:var(--amber); color:var(--amber); }
-.sms-parse-btn {
-  width:100%; padding:10px;
-  background:linear-gradient(135deg,var(--amber),#f97316);
-  border:none; border-radius:8px; color:#fff;
-  font-family:'Cabinet Grotesk',sans-serif; font-size:13px; font-weight:700;
-  cursor:pointer; transition:opacity .2s;
-}
-.sms-parse-btn:hover { opacity:.9; }
-
-/* ══════════════════ ANALYTICS PANEL ══════════════════ */
-.stats-grid {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px;
-}
-@media(max-width:600px) { .stats-grid { grid-template-columns:1fr 1fr; } }
-.stat-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:18px;
-  position:relative; overflow:hidden;
-}
-.stat-card::after {
-  content:''; position:absolute; bottom:-20px; right:-20px;
-  width:70px; height:70px; border-radius:50%;
-  background:radial-gradient(circle, var(--glow-clr,rgba(79,142,255,.15)), transparent);
-}
-.stat-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
-.stat-value { font-size:28px; font-weight:800; letter-spacing:-.5px; }
-.stat-sub { font-size:11px; color:var(--muted); margin-top:4px; }
-
-.chart-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; margin-bottom:16px;
-}
-.chart-title { font-size:14px; font-weight:700; margin-bottom:16px; color:var(--muted); }
-
-/* BAR CHART */
-.bar-chart { display:flex; align-items:flex-end; gap:8px; height:120px; }
-.bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
-.bar {
-  width:100%; border-radius:6px 6px 0 0;
-  transition:height .6s cubic-bezier(.16,1,.3,1);
-  min-height:4px; position:relative; cursor:pointer;
-}
-.bar:hover { opacity:.8; }
-.bar-label { font-size:10px; color:var(--muted); font-weight:600; white-space:nowrap; }
-.bar-val { font-size:10px; font-weight:700; }
-
-/* CATEGORY BREAKDOWN */
-.cat-breakdown { display:flex; flex-direction:column; gap:10px; }
-.cat-row { display:flex; align-items:center; gap:12px; }
-.cat-row-icon { font-size:18px; width:24px; text-align:center; }
-.cat-row-info { flex:1; }
-.cat-row-name { font-size:13px; font-weight:600; margin-bottom:4px; }
-.cat-row-bar-wrap { height:5px; background:var(--surface2); border-radius:3px; }
-.cat-row-bar { height:100%; border-radius:3px; transition:width .6s ease; }
-.cat-row-amt { font-size:13px; font-weight:800; min-width:60px; text-align:right; }
-
-/* ══════════════════ SETTINGS PANEL ══════════════════ */
-.settings-section { margin-bottom:24px; }
-.settings-title {
-  font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.1em;
-  color:var(--muted); margin-bottom:12px; padding-bottom:8px;
-  border-bottom:1px solid var(--border);
-}
-.setting-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 0; border-bottom:1px solid var(--border);
-}
-.setting-row:last-child { border-bottom:none; }
-.setting-info .setting-name { font-size:14px; font-weight:600; }
-.setting-info .setting-desc { font-size:12px; color:var(--muted); margin-top:2px; }
-.toggle-wrap { position:relative; width:46px; height:26px; cursor:pointer; }
-.toggle-input { opacity:0; width:0; height:0; position:absolute; }
-.toggle-slider {
-  position:absolute; inset:0; background:var(--surface3);
-  border-radius:13px; border:1px solid var(--border);
-  transition:background .25s;
-}
-.toggle-slider::after {
-  content:''; position:absolute; left:3px; top:3px;
-  width:18px; height:18px; border-radius:50%;
-  background:#fff; transition:transform .25s;
-}
-.toggle-input:checked + .toggle-slider { background:var(--accent); border-color:var(--accent); }
-.toggle-input:checked + .toggle-slider::after { transform:translateX(20px); }
-
-.batch-info-card {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; padding:16px; margin-bottom:16px;
-}
-.batch-info-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
-.batch-info-key { font-size:12px; color:var(--muted); }
-.batch-info-val { font-size:12px; font-weight:700; color:var(--accent); }
-.last-refresh { font-size:11px; color:var(--muted); text-align:center; padding:8px; }
-
-/* ══════════════════ SHARED ══════════════════ */
-.card-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:16px;
-}
-.card-h { font-size:16px; font-weight:800; letter-spacing:-.2px; }
-.card-sub { font-size:12px; color:var(--muted); }
-
-.refresh-badge {
-  display:flex; align-items:center; gap:6px;
-  background:var(--surface2); border:1px solid var(--border);
-  padding:4px 10px; border-radius:20px; font-size:11px; color:var(--muted); font-weight:600;
-  cursor:pointer; transition:all .2s;
-}
-.refresh-badge:hover { border-color:var(--accent); color:var(--accent); }
-.refresh-badge.spinning .spin-icon { animation:spin 1s linear infinite; }
-.spin-icon { display:inline-block; }
-
-@keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes pulse { 0%,100%{box-shadow:0 0 12px var(--green),0 0 24px rgba(61,255,160,.3)} 50%{box-shadow:0 0 20px var(--green),0 0 40px rgba(61,255,160,.5)} }
-@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@keyframes popIn { from{opacity:0;transform:scale(.8) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
-
-/* ══════════════════ CORRECTIONS / ADMIN ══════════════════ */
-.report-btn {
-  background:transparent; border:1px solid var(--border);
-  color:var(--muted); font-size:10px; font-weight:700;
-  padding:2px 8px; border-radius:5px; cursor:pointer;
-  font-family:'Cabinet Grotesk',sans-serif;
-  transition:all .2s; white-space:nowrap;
-}
-.report-btn:hover { border-color:var(--pink); color:var(--pink); }
-
-.correction-badge {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:10px; font-weight:700; color:var(--green);
-  background:rgba(61,255,160,.1); padding:1px 6px; border-radius:4px;
-  margin-left:6px;
-}
-.pending-badge {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:10px; font-weight:700; color:var(--amber);
-  background:rgba(255,184,79,.1); padding:1px 6px; border-radius:4px;
+.comp-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
 }
 
-/* REPORT MODAL */
-.modal-overlay {
-  position:fixed; inset:0; z-index:500;
-  background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
-  display:flex; align-items:center; justify-content:center; padding:20px;
-}
-.modal-overlay.hidden { display:none; }
-.modal-card {
-  background:var(--surface); border:1px solid var(--border2);
-  border-radius:20px; padding:28px; width:100%; max-width:480px;
-  box-shadow:0 40px 80px rgba(0,0,0,.6);
-  animation:slideUp .35s cubic-bezier(.16,1,.3,1);
-}
-.modal-title {
-  font-family:'Cabinet Grotesk',sans-serif; font-size:18px; font-weight:800;
-  margin-bottom:4px;
-}
-.modal-sub { font-size:12px; color:var(--muted); margin-bottom:20px; }
-.modal-close {
-  float:right; background:none; border:none; color:var(--muted);
-  font-size:20px; cursor:pointer; margin-top:-4px;
-}
-.modal-close:hover { color:var(--text); }
-
-.ai-thinking {
-  background:rgba(79,142,255,.07); border:1px solid rgba(79,142,255,.2);
-  border-radius:10px; padding:12px; margin:12px 0;
-  font-size:12px; color:var(--accent); display:none;
-  animation:fadeIn .3s ease;
-}
-.ai-thinking.show { display:block; }
-.ai-result {
-  border-radius:10px; padding:12px; margin:12px 0;
-  font-size:13px; display:none;
-}
-.ai-result.show { display:block; }
-.ai-result.valid { background:rgba(61,255,160,.08); border:1px solid rgba(61,255,160,.25); color:var(--green); }
-.ai-result.invalid { background:rgba(255,79,142,.08); border:1px solid rgba(255,79,142,.25); color:var(--pink); }
-
-/* ADMIN PANEL */
-.admin-header {
-  background:linear-gradient(135deg,rgba(255,184,79,.12),rgba(255,79,142,.08));
-  border:1px solid rgba(255,184,79,.3); border-radius:12px;
-  padding:14px 18px; margin-bottom:20px;
-  display:flex; align-items:center; gap:10px;
-}
-.admin-crown { font-size:22px; }
-.admin-title { font-size:15px; font-weight:800; color:var(--amber); }
-.admin-sub { font-size:12px; color:var(--muted); }
-
-.correction-queue { display:flex; flex-direction:column; gap:10px; }
-.correction-item {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; overflow:hidden;
-}
-.ci-header {
-  padding:12px 16px; background:var(--surface2);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-}
-.ci-date { font-size:12px; font-weight:800; color:var(--accent); }
-.ci-batch { font-size:11px; color:var(--muted); }
-.ci-reporter { font-size:11px; color:var(--muted); margin-left:auto; }
-.ci-body { padding:14px 16px; }
-.ci-row { display:grid; grid-template-columns:80px 1fr; gap:8px; margin-bottom:8px; align-items:start; }
-.ci-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding-top:2px; }
-.ci-val { font-size:13px; }
-.ci-old { text-decoration:line-through; color:var(--pink); opacity:.7; }
-.ci-new { color:var(--green); font-weight:700; }
-.ci-note { font-size:12px; color:var(--muted); font-style:italic; }
-.ci-ai-verdict {
-  background:var(--surface2); border-radius:8px; padding:8px 12px;
-  font-size:12px; margin-bottom:10px; border-left:3px solid var(--accent);
-  color:var(--muted); line-height:1.5;
-}
-.ci-actions { display:flex; gap:8px; }
-.ci-approve {
-  flex:1; padding:9px; background:rgba(61,255,160,.15);
-  border:1px solid rgba(61,255,160,.3); border-radius:8px;
-  color:var(--green); font-family:'Cabinet Grotesk',sans-serif;
-  font-size:13px; font-weight:700; cursor:pointer; transition:all .2s;
-}
-.ci-approve:hover { background:rgba(61,255,160,.25); }
-.ci-reject {
-  flex:1; padding:9px; background:rgba(255,79,142,.1);
-  border:1px solid rgba(255,79,142,.25); border-radius:8px;
-  color:var(--pink); font-family:'Cabinet Grotesk',sans-serif;
-  font-size:13px; font-weight:700; cursor:pointer; transition:all .2s;
-}
-.ci-reject:hover { background:rgba(255,79,142,.2); }
-
-.empty-queue {
-  text-align:center; padding:48px 20px; color:var(--muted);
-}
-.admin-nav-pill {
-  background:var(--amber); color:#000;
-  font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px;
-  min-width:18px; text-align:center; display:none;
+/* Summary */
+.summary-text {
+  font-size: 20px; font-weight: 300; line-height: 1.5;
+  color: var(--text); font-style: italic;
+  border-left: 3px solid var(--accent);
+  padding-left: 16px;
 }
 
+/* Key points */
+.key-points { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.key-point {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 14px; line-height: 1.6;
+}
+.kp-num {
+  flex-shrink: 0; width: 22px; height: 22px;
+  border-radius: 6px; background: rgba(78,124,255,.15);
+  border: 1px solid rgba(78,124,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  margin-top: 1px;
+}
+
+/* Exam questions */
+.exam-questions { display: flex; flex-direction: column; gap: 12px; }
+.exam-q {
+  background: var(--surface2); border-radius: 10px;
+  padding: 12px 14px; font-size: 13px; line-height: 1.6;
+  border-left: 3px solid var(--pink);
+  cursor: pointer; transition: background .2s;
+  position: relative;
+}
+.exam-q:hover { background: var(--surface3); }
+.exam-q-num {
+  font-size: 10px; font-weight: 700; color: var(--pink);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 4px;
+}
+.exam-ans {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--muted); display: none;
+  line-height: 1.6;
+}
+.exam-q.open .exam-ans { display: block; }
+.exam-q.open { background: var(--surface3); }
+
+/* Mind map */
+.mindmap { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; }
+.mm-root { color: var(--accent); font-weight: 600; font-size: 15px; }
+.mm-branch { color: var(--text); margin-left: 20px; }
+.mm-branch::before { content: '├─ '; color: var(--muted); }
+.mm-branch:last-child::before { content: '└─ '; color: var(--muted); }
+.mm-leaf { color: var(--muted); margin-left: 44px; font-size: 12px; }
+.mm-leaf::before { content: '· '; }
+
+/* ── LOADING SKELETON ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px; height: 14px; margin-bottom: 8px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── COPY BUTTON ── */
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: transparent; border: 1px solid var(--border2);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 11px; color: var(--muted); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all .2s;
+  margin-left: auto;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center; padding: 40px 0 20px;
+  font-size: 12px; color: var(--muted);
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════ AUTH ══════════ -->
-<div id="auth-screen">
-  <div class="auth-wrap">
-    <div class="auth-logo-row">
-      <div class="auth-logo">⚡ CampusAI</div>
-      <div class="auth-sub">Your smart student companion — PGDM 2024-26 & 2025-27</div>
-    </div>
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-        <button class="auth-tab" onclick="switchAuthTab('signup')">Create Account</button>
-      </div>
+<div class="bg-grid"></div>
+<div class="bg-glow1"></div>
+<div class="bg-glow2"></div>
 
-      <!-- LOGIN -->
-      <div id="login-form">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" id="login-email" type="email" placeholder="yourname@example.com">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input class="form-input" id="login-pass" type="password" placeholder="••••••••">
-        </div>
-        <button class="btn" onclick="doLogin()">Sign In →</button>
-        <div class="auth-error" id="login-error"></div>
-      </div>
+<div class="container">
 
-      <!-- SIGNUP -->
-      <div id="signup-form" style="display:none">
-        <div class="form-group">
-          <label class="form-label">Full Name</label>
-          <input class="form-input" id="su-name" type="text" placeholder="Your full name">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" id="su-email" type="email" placeholder="yourname@example.com">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input class="form-input" id="su-pass" type="password" placeholder="Min 6 characters">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Batch</label>
-            <select class="form-select" id="su-batch" onchange="onBatchChange()">
-              <option value="">Select batch</option>
-              <option value="2025-27">PGDM 2025-27 (Term III)</option>
-              <option value="2024-26">PGDM 2024-26 (Term VI)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Section</label>
-            <select class="form-select" id="su-section" onchange="onSectionChange()">
-              <option value="">Select section</option>
-              <option value="A">Section A</option>
-              <option value="B">Section B</option>
-              <option value="C">Section C</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- SUBJECT BASKET — only for 2024-26 -->
-        <div id="basket-wrap" style="display:none">
-          <div class="form-group">
-            <label class="form-label">Your Subject Basket <span style="color:var(--pink)">*</span></label>
-            <div class="basket-note">Select the electives that apply to you</div>
-            <div class="subject-basket visible" id="subject-basket"></div>
-          </div>
-        </div>
-
-        <button class="btn" onclick="doSignup()">Create Account →</button>
-        <div class="auth-error" id="signup-error"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ APP ══════════ -->
-<div id="app">
+  <!-- HEADER -->
   <div class="header">
-    <div class="header-left">
-      <div class="header-logo">⚡ CampusAI</div>
-      <div class="header-badge" id="hdr-batch">—</div>
-    </div>
-    <div class="header-right">
-      <div class="user-chip">
-        <div class="user-av" id="hdr-av">?</div>
-        <span class="user-name" id="hdr-name">—</span>
-      </div>
-      <button class="btn-sm" onclick="doLogout()">Sign out</button>
+    <div class="header-eyebrow">⚡ Powered by Claude AI</div>
+    <div class="header-title">Understand <span>Anything</span><br>6 Different Ways</div>
+    <div class="header-sub">Paste any topic or notes — get instant multi-angle explanations, key points, exam questions and a mind map.</div>
+    <div class="caps">
+      <div class="cap-pill"><div class="cap-dot" style="background:var(--eli5)"></div>Simple Explanation</div>
+      <div class="cap-pill"><div class="cap-dot" style="background:var(--academic)"></div>Academic View</div>
+      <div class="cap-pill"><div class="cap-dot" style="background:var(--practical)"></div>Real World Application</div>
+      <div class="cap-pill"><div class="cap-dot" style="background:var(--pink)"></div>Exam Questions</div>
+      <div class="cap-pill"><div class="cap-dot" style="background:var(--accent2)"></div>Mind Map</div>
     </div>
   </div>
-  <div class="refresh-bar"><div class="refresh-progress" id="refresh-prog"></div></div>
-  <div class="nav">
-    <button class="nav-tab active" onclick="switchTab('today')" data-tab="today"><span class="nav-icon">📅</span>Today</button>
-    <button class="nav-tab" onclick="switchTab('monthly')" data-tab="monthly"><span class="nav-icon">🗓️</span>Monthly</button>
-    <button class="nav-tab" onclick="switchTab('expenses')" data-tab="expenses"><span class="nav-icon">💸</span>Expenses</button>
-    <button class="nav-tab" onclick="switchTab('analytics')" data-tab="analytics"><span class="nav-icon">📊</span>Analytics</button>
-    <button class="nav-tab" onclick="switchTab('settings')" data-tab="settings"><span class="nav-icon">⚙️</span>Settings</button>
-    <button class="nav-tab" id="admin-tab-btn" onclick="switchTab('admin')" data-tab="admin" style="display:none"><span class="nav-icon">🛡️</span>Admin <span class="admin-nav-pill" id="admin-pill">0</span></button>
-  </div>
 
-  <!-- TODAY -->
-  <div class="content">
-    <div class="panel active" id="panel-today">
-      <div class="today-hero">
-        <div class="today-date-block">
-          <div class="today-greeting" id="greeting-text">Good morning</div>
-          <div class="today-date-big" id="today-date-big">—</div>
-          <div class="today-sub" id="today-sub-text">—</div>
-        </div>
-        <div class="next-class-card" id="next-class-widget" style="display:none">
-          <div class="ncl">Next Class</div>
-          <div class="ncl-subject" id="ncw-subject">—</div>
-          <div class="ncl-meta" id="ncw-meta">—</div>
-          <div class="ncl-time" id="ncw-time">—</div>
-          <div class="ncl-countdown" id="ncw-cd">—</div>
-        </div>
+  <!-- INPUT -->
+  <div class="input-card">
+    <div class="input-label">Enter your topic or paste notes</div>
+    <textarea id="topic-input" placeholder="e.g. 'Porter's Five Forces', 'Supply chain management', or paste your entire lecture notes here..."></textarea>
+    <div class="input-footer">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="setMode('topic',this)">Topic / Term</button>
+        <button class="mode-tab" onclick="setMode('notes',this)">Lecture Notes</button>
       </div>
-      <div class="card-header">
-        <div>
-          <div class="card-h">Today's Schedule</div>
-          <div class="card-sub" id="schedule-sub">Your personalised timetable</div>
-        </div>
-        <div class="refresh-badge" id="refresh-btn" onclick="forceRefresh()">
-          <span class="spin-icon">↻</span> <span id="last-refresh-text">Refresh</span>
-        </div>
-      </div>
-      <div class="timeline" id="timeline-wrap"></div>
-    </div>
-
-    <!-- MONTHLY -->
-    <div class="panel" id="panel-monthly">
-      <div class="card-header" style="margin-bottom:20px">
-        <div>
-          <div class="card-h" id="monthly-title">Monthly Timetable</div>
-          <div class="card-sub">Full schedule for your batch &amp; section</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn-sm" onclick="changeMonth(-1)">← Prev</button>
-          <span id="month-label" style="font-size:13px;font-weight:700;min-width:100px;text-align:center"></span>
-          <button class="btn-sm" onclick="changeMonth(1)">Next →</button>
-        </div>
-      </div>
-      <div id="monthly-wrap"></div>
-    </div>
-
-    <!-- EXPENSES -->
-    <div class="panel" id="panel-expenses">
-      <div class="expense-layout">
-        <div>
-          <div class="section-title">➕ Log Expense</div>
-          <div class="quick-add-card">
-            <div class="amount-input-wrap">
-              <span class="amount-prefix">₹</span>
-              <input class="amount-input" id="exp-amount" type="number" placeholder="0" min="0">
-            </div>
-            <div class="cat-grid" id="cat-grid"></div>
-            <input class="desc-input" id="exp-desc" placeholder="What was this for? (e.g. lunch, auto, notes)">
-            <button class="add-btn" onclick="addExpense()">Add Expense</button>
-          </div>
-
-          <div class="card-header" style="margin-top:20px">
-            <div class="card-h">Recent Transactions</div>
-            <div style="font-size:12px;color:var(--muted)" id="exp-count-badge">0 entries</div>
-          </div>
-          <div class="expense-list" id="expense-list">
-            <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">
-              No expenses yet — add your first one above 👆
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="section-title">🤖 Telegram Bot</div>
-          <div class="tg-card">
-            <div class="tg-header">
-              <div class="tg-icon">✈️</div>
-              <div>
-                <div class="tg-title">Auto SMS Tracking</div>
-                <div class="tg-sub">Forward payment SMSes to our bot</div>
-              </div>
-            </div>
-            <ul class="tg-steps">
-              <li>Search <strong>@CampusAI_ExpenseBot</strong> on Telegram</li>
-              <li>Send <code>/start</code> and link your CampusAI email</li>
-              <li>After any GPay/PhonePe/Paytm payment, forward the SMS to the bot</li>
-              <li>Bot reads the amount & asks "What was this for?" — reply with a category</li>
-              <li>Expense auto-syncs here 🎉</li>
-            </ul>
-            <a href="https://t.me" target="_blank" class="tg-btn">Open Telegram →</a>
-          </div>
-
-          <!-- SMS SIMULATOR (demo) -->
-          <div class="sms-sim-card">
-            <div class="sms-sim-header">🔬 Live Demo — Simulate an SMS</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Click a sample SMS to simulate parsing (for presentation demo)</div>
-            <div class="sms-templates">
-              <div class="sms-tmpl" onclick="simulateSMS(this, 249, 'GPay', 'Swiggy')">GPay: Rs.249.00 debited from A/c XX4521 on 10-Mar for Swiggy. Ref: 4521098765</div>
-              <div class="sms-tmpl" onclick="simulateSMS(this, 50, 'PhonePe', 'Auto Rickshaw')">PhonePe: Payment of Rs 50 to Auto Rickshaw successful. UPI Ref: 7721034561</div>
-              <div class="sms-tmpl" onclick="simulateSMS(this, 120, 'Paytm', 'Cafe Coffee Day')">Paytm: Rs.120 paid to Cafe Coffee Day. Txn ID: PTM29384756. Bal: Rs 780.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ANALYTICS -->
-    <div class="panel" id="panel-analytics">
-      <div class="stats-grid" id="stats-grid"></div>
-      <div class="chart-card">
-        <div class="chart-title">📅 Daily Spend — This Month</div>
-        <div class="bar-chart" id="bar-chart"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">🥧 Spending by Category</div>
-        <div class="cat-breakdown" id="cat-breakdown"></div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="panel" id="panel-settings">
-      <div class="settings-section">
-        <div class="settings-title">Your Profile</div>
-        <div class="batch-info-card" id="profile-card"></div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-title">Notifications</div>
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-name">Browser Notifications</div>
-            <div class="setting-desc">Remind me 10 mins before each class</div>
-          </div>
-          <label class="toggle-wrap">
-            <input type="checkbox" class="toggle-input" id="notif-toggle" onchange="toggleNotifications()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-name">Auto-refresh Timetable</div>
-            <div class="setting-desc">Fetch latest schedule every 30 minutes</div>
-          </div>
-          <label class="toggle-wrap">
-            <input type="checkbox" class="toggle-input" id="refresh-toggle" checked onchange="toggleAutoRefresh()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-      <div class="settings-section" id="admin-settings-section" style="display:none">
-        <div class="settings-title">Admin Management</div>
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-name">Grant Admin Access</div>
-            <div class="setting-desc">Add another CR as admin to approve corrections</div>
-          </div>
-          <button class="btn-sm" onclick="document.getElementById('promote-modal').classList.remove('hidden');renderAdminManagement()" style="border-color:var(--amber);color:var(--amber)">+ Add Admin</button>
-        </div>
-        <div id="admin-mgmt-wrap" style="margin-top:8px"></div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-title">Data</div>
-        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:8px">
-          <div class="setting-info">
-            <div class="setting-name">📡 Apps Script URL</div>
-            <div class="setting-desc">Paste your deployed Google Apps Script URL for live timetable sync</div>
-          </div>
-          <div style="display:flex;gap:8px;width:100%">
-            <input class="form-input" id="gas-url-input" type="url"
-              placeholder="https://script.google.com/macros/s/…/exec"
-              style="font-size:12px;padding:8px 12px;flex:1"
-              oninput="saveGASUrl(this.value)">
-          </div>
-          <div id="gas-url-status" style="font-size:11px;color:var(--muted)"></div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-name">Last Timetable Fetch</div>
-            <div class="setting-desc" id="last-fetch-time">Never</div>
-          </div>
-          <button class="btn-sm" onclick="forceRefresh()">Refresh Now</button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-name">Clear All Expenses</div>
-            <div class="setting-desc">Permanently delete all recorded transactions</div>
-          </div>
-          <button class="btn-sm" onclick="clearExpenses()" style="border-color:var(--pink);color:var(--pink)">Clear</button>
-        </div>
-      </div>
-    <!-- SMS SETUP SECTION inside settings -->
-      <div class="settings-section" id="sms-setup-section">
-        <div class="settings-title">SMS Auto-Detection Setup</div>
-        <div style="display:flex;gap:10px;margin-bottom:14px">
-          <button class="btn-sm" id="android-tab-btn" onclick="showSMSTab('android')" style="border-color:var(--accent);color:var(--accent)">Android (MacroDroid)</button>
-          <button class="btn-sm" id="ios-tab-btn" onclick="showSMSTab('ios')">iPhone (Shortcuts)</button>
-        </div>
-        <div id="sms-android" class="sms-setup-content">
-          <div class="tg-card">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">
-              MacroDroid watches incoming SMSes and hits a webhook in this app automatically.
-              When a payment SMS arrives, the AI popup fires instantly.
-            </div>
-            <ul class="tg-steps">
-              <li>Install <strong>MacroDroid</strong> from Play Store (free)</li>
-              <li>Create a new Macro → Trigger: <strong>SMS Received</strong> → match sender contains <code>GPay</code> OR <code>PhonePe</code> OR <code>Paytm</code> OR <code>HDFC</code> OR <code>ICICI</code> OR <code>SBI</code></li>
-              <li>Action: <strong>HTTP Request</strong> → URL: <code id="webhook-url-android">https://your-app-url/?sms={sms_content}</code></li>
-              <li>Save macro and enable it. Done — payments will now auto-appear in CampusAI!</li>
-            </ul>
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px">
-              <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase">Your Webhook URL</div>
-              <div style="font-size:12px;font-family:monospace;color:var(--accent);word-break:break-all" id="webhook-display">Loading...</div>
-              <button onclick="copyWebhook()" class="btn-sm" style="margin-top:8px;font-size:11px">Copy URL</button>
-            </div>
-          </div>
-        </div>
-        <div id="sms-ios" class="sms-setup-content" style="display:none">
-          <div class="tg-card">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">
-              Use iOS Shortcuts to watch for payment notifications and send them to CampusAI.
-            </div>
-            <ul class="tg-steps">
-              <li>Open <strong>Shortcuts</strong> app → tap <strong>Automation</strong> → New Automation</li>
-              <li>Trigger: <strong>App</strong> → select GPay / PhonePe / Paytm → "Is Opened"</li>
-              <li>Action: <strong>Get Contents of URL</strong> → paste your webhook URL below</li>
-              <li>Method: GET, add parameter <code>sms</code> = "Payment detected from app"</li>
-              <li>Turn off "Ask Before Running" → Done!</li>
-            </ul>
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px">
-              <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase">Your Webhook URL</div>
-              <div style="font-size:12px;font-family:monospace;color:var(--accent);word-break:break-all" id="webhook-display-ios">Loading...</div>
-              <button onclick="copyWebhook()" class="btn-sm" style="margin-top:8px;font-size:11px">Copy URL</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ADMIN PANEL -->
-    <div class="panel" id="panel-admin">
-      <div class="admin-header">
-        <div class="admin-crown">👑</div>
-        <div>
-          <div class="admin-title">Admin — Correction Queue</div>
-          <div class="admin-sub">Review and approve timetable corrections reported by students</div>
-        </div>
-      </div>
-      <div id="correction-queue-wrap">
-        <div class="empty-queue">
-          <div style="font-size:40px;margin-bottom:10px">✅</div>
-          <div style="font-weight:700">No pending corrections</div>
-          <div style="font-size:13px;margin-top:4px">All clear!</div>
-        </div>
-      </div>
-    </div>
-
-
-  </div>
-</div>
-
-
-<!-- REPORT MODAL -->
-<div class="modal-overlay hidden" id="report-modal">
-  <div class="modal-card">
-    <button class="modal-close" onclick="closeReportModal()">×</button>
-    <div class="modal-title">🚩 Report a Correction</div>
-    <div class="modal-sub" id="report-context">Reporting an issue for this class</div>
-
-    <div class="form-group">
-      <label class="form-label">What's wrong?</label>
-      <select class="form-select" id="report-type" onchange="onReportTypeChange()">
-        <option value="">Select issue type</option>
-        <option value="wrong_venue">Wrong venue / room</option>
-        <option value="wrong_subject">Wrong subject code or name</option>
-        <option value="wrong_time">Wrong time slot</option>
-        <option value="class_cancelled">Class cancelled / holiday</option>
-        <option value="extra_class">Missing class (not shown here)</option>
-      </select>
-    </div>
-
-    <div id="report-fields" style="display:none">
-      <div class="form-group" id="field-current-wrap">
-        <label class="form-label">Current (wrong) value</label>
-        <input class="form-input" id="report-current" type="text" placeholder="e.g. Tutorial Room" readonly style="opacity:.6">
-      </div>
-      <div class="form-group" id="field-correct-wrap">
-        <label class="form-label">Correct value <span style="color:var(--pink)">*</span></label>
-        <input class="form-input" id="report-correct" type="text" placeholder="e.g. CR6">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Additional notes (optional)</label>
-        <input class="form-input" id="report-note" type="text" placeholder="Any extra context...">
-      </div>
-
-      <div class="ai-thinking" id="ai-thinking">
-        <span style="animation:pulse 1.5s infinite;display:inline-block">🤖</span> AI is validating your correction...
-      </div>
-      <div class="ai-result" id="ai-result"></div>
-
-      <button class="btn" onclick="submitReport()" id="submit-report-btn" style="margin-top:4px">
-        Validate & Submit →
+      <button class="analyze-btn" id="analyze-btn" onclick="analyze()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">✦ Analyze</span>
       </button>
     </div>
   </div>
-</div>
 
-<!-- ADMIN PROMOTE MODAL -->
-<div class="modal-overlay hidden" id="promote-modal">
-  <div class="modal-card">
-    <button class="modal-close" onclick="document.getElementById('promote-modal').classList.add('hidden')">×</button>
-    <div class="modal-title">👑 Set Admin Access</div>
-    <div class="modal-sub">Enter an email to grant admin (CR) privileges. Admins can approve timetable corrections.</div>
-    <div class="form-group" style="margin-top:8px">
-      <label class="form-label">Student Email</label>
-      <input class="form-input" id="promote-email" type="email" placeholder="student@example.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Role / Subject Area</label>
-      <input class="form-input" id="promote-role" type="text" placeholder="e.g. CR for Section B, Finance subjects">
-    </div>
-    <button class="btn" onclick="promoteAdmin()">Grant Admin Access →</button>
-    <div class="auth-error" id="promote-error"></div>
-  </div>
-</div>
+  <!-- RESULTS -->
+  <div id="results">
 
-<!-- AI POPUP -->
-<div class="ai-popup" id="ai-popup">
-  <div class="ai-popup-header">
-    <div class="ai-avatar">🤖</div>
-    <div>
-      <div class="ai-name">CampusAI Assistant</div>
-      <div class="ai-sub">Payment detected</div>
+    <!-- 3 PERSPECTIVES -->
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(255,255,255,.05)">🔭</div>
+      <div>
+        <div class="section-title">3 Ways to Understand It</div>
+        <div class="section-sub">Same concept, three completely different lenses</div>
+      </div>
     </div>
-    <button onclick="closeAIPopup()" style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>
-  </div>
-  <div class="ai-amount-display">
-    <div>
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Amount Detected</div>
-      <div class="ai-amount" id="popup-amount">₹0</div>
+
+    <div class="perspectives-grid">
+      <div class="perspective-card pc-eli5">
+        <div class="pc-header">
+          <div class="pc-icon">🧒</div>
+          <div>
+            <div class="pc-label">Simple (ELI5)</div>
+            <div class="pc-desc">Explain like I'm 12</div>
+          </div>
+        </div>
+        <div class="pc-body" id="eli5-body">
+          <div class="skeleton" style="width:90%"></div>
+          <div class="skeleton" style="width:75%"></div>
+          <div class="skeleton" style="width:85%"></div>
+          <div class="skeleton" style="width:60%"></div>
+        </div>
+      </div>
+      <div class="perspective-card pc-academic">
+        <div class="pc-header">
+          <div class="pc-icon">🎓</div>
+          <div>
+            <div class="pc-label">Academic</div>
+            <div class="pc-desc">Textbook-level depth</div>
+          </div>
+        </div>
+        <div class="pc-body" id="academic-body">
+          <div class="skeleton" style="width:90%"></div>
+          <div class="skeleton" style="width:75%"></div>
+          <div class="skeleton" style="width:85%"></div>
+          <div class="skeleton" style="width:60%"></div>
+        </div>
+      </div>
+      <div class="perspective-card pc-practical">
+        <div class="pc-header">
+          <div class="pc-icon">🏢</div>
+          <div>
+            <div class="pc-label">Real World</div>
+            <div class="pc-desc">How it works in business</div>
+          </div>
+        </div>
+        <div class="pc-body" id="practical-body">
+          <div class="skeleton" style="width:90%"></div>
+          <div class="skeleton" style="width:75%"></div>
+          <div class="skeleton" style="width:85%"></div>
+          <div class="skeleton" style="width:60%"></div>
+        </div>
+      </div>
     </div>
-    <div style="text-align:right">
-      <div class="ai-source" id="popup-source">via GPay</div>
-      <div style="font-size:11px;color:var(--muted)" id="popup-merchant"></div>
+
+    <!-- SMART COMPRESSION -->
+    <div class="section-header" style="margin-top:40px">
+      <div class="section-icon" style="background:rgba(255,255,255,.05)">📦</div>
+      <div>
+        <div class="section-title">Smart Compression</div>
+        <div class="section-sub">Everything you need, nothing you don't</div>
+      </div>
     </div>
+
+    <div class="compression-grid">
+
+      <!-- 1-line summary -->
+      <div class="comp-card" style="grid-column: 1 / -1; border-top: 2px solid var(--accent)">
+        <div class="comp-card-title">
+          ⚡ One-Line Summary
+          <button class="copy-btn" onclick="copyText('summary-text')">Copy</button>
+        </div>
+        <div class="summary-text" id="summary-text">
+          <div class="skeleton" style="width:80%;height:20px"></div>
+        </div>
+      </div>
+
+      <!-- Key points -->
+      <div class="comp-card" style="border-top: 2px solid var(--accent2)">
+        <div class="comp-card-title">
+          🎯 5 Key Points
+          <button class="copy-btn" onclick="copyText('key-points')">Copy</button>
+        </div>
+        <ul class="key-points" id="key-points">
+          ${[1,2,3,4,5].map(i=>`<li class="key-point"><div class="skeleton" style="width:100%;height:14px;flex:1"></div></li>`).join('')}
+        </ul>
+      </div>
+
+      <!-- Exam questions -->
+      <div class="comp-card" style="border-top: 2px solid var(--pink)">
+        <div class="comp-card-title">❓ 3 Exam Questions</div>
+        <div class="exam-questions" id="exam-questions">
+          ${[1,2,3].map(i=>`<div class="skeleton" style="height:50px"></div>`).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px">👆 Click any question to reveal a model answer</div>
+      </div>
+
+    </div>
+
+    <!-- MIND MAP -->
+    <div class="section-header" style="margin-top:32px">
+      <div class="section-icon" style="background:rgba(255,255,255,.05)">🗺️</div>
+      <div>
+        <div class="section-title">Mind Map Outline</div>
+        <div class="section-sub">Visual hierarchy of the concept</div>
+      </div>
+    </div>
+    <div class="comp-card" style="border-top: 2px solid var(--green)">
+      <div class="comp-card-title">
+        🌳 Structure
+        <button class="copy-btn" onclick="copyText('mindmap')">Copy</button>
+      </div>
+      <div class="mindmap" id="mindmap">
+        <div class="skeleton" style="width:40%"></div>
+        <div class="skeleton" style="width:60%;margin-left:20px;margin-top:8px"></div>
+        <div class="skeleton" style="width:50%;margin-left:20px;margin-top:4px"></div>
+        <div class="skeleton" style="width:55%;margin-left:44px;margin-top:4px"></div>
+      </div>
+    </div>
+
   </div>
-  <div class="ai-msg">Hey! I spotted a payment. What was this expense for?</div>
-  <input class="ai-input" id="ai-desc-input" placeholder="e.g. lunch, notes, travel...">
-  <div class="ai-btn-row">
-    <button class="ai-btn primary" onclick="confirmAIExpense()">Log it ✓</button>
-    <button class="ai-btn secondary" onclick="closeAIPopup()">Skip</button>
-  </div>
+
+  <div class="footer">Built with ⚡ Claude AI · StudyAI</div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-// DATA — SUBJECT CATALOG
-// ══════════════════════════════════════════
-const TERM_VI_SUBJECTS = [
-  { code:'OB623', name:'Employee Engagement & Well-being' },
-  { code:'OB621', name:'Management Lessons from Bhagavat Gita' },
-  { code:'OB622', name:'Managing Change in Disruptive World' },
-  { code:'IS615', name:'Decision Modelling using Excel & VBA' },
-  { code:'IS623', name:'IT Project Management' },
-  { code:'OM627', name:'Procurement & Strategic Sourcing' },
-  { code:'OM505', name:'Management Science Application' },
-  { code:'MK623', name:'Advertising and IMC' },
-  { code:'MK621', name:'Business Forecasting' },
-  { code:'MK628', name:'Pricing Policy & Management' },
-  { code:'FN648', name:'AI & Fintech' },
-  { code:'FN611', name:'Investment Banking' },
-  { code:'FN649', name:'Personal Finance & Wealth Management' },
-  { code:'ST607', name:'Business Ethics & Corporate Governance' },
-  { code:'MK609', name:'Rural Marketing' },
-  { code:'GM502', name:'Business Communication Skills-II' },
-];
+let currentMode = 'topic';
 
-const TERM_III_SUBJECTS = [
-  { code:'HR501', name:'Human Resource Management' },
-  { code:'IS-608', name:'Business Analytics' },
-  { code:'OM502', name:'Operations Management-II' },
-  { code:'QM503', name:'Research Methods for Management' },
-  { code:'MK504', name:'Marketing Strategy' },
-  { code:'ST509(A)', name:'Strategic Management I' },
-  { code:'FN502', name:'Financial Management-II' },
-  { code:'GM502', name:'Business Communication Skills-II' },
-];
-
-// VENUE MAP: { subjectCode: { A: venueA, B: venueB, C: venueC } }
-const VENUE_MAP = {
-  // Term VI — from sheet (section A defaults shown, B/C same unless noted)
-  'OB623':  { A:'Tutorial Room', B:'Tutorial Room', C:'Tutorial Room' },
-  'OB621':  { A:'CR6', B:'CR6', C:'CR6' },
-  'IS615':  { A:'CR6', B:'CR6', C:'CR6' },
-  'OB622':  { A:'Tutorial Room', B:'Tutorial Room', C:'Tutorial Room' },
-  'IS615':  { A:'CR6', B:'CR6', C:'CR6' },
-  'IS623':  { A:'CR6', B:'CR6', C:'CR6' },
-  'OM627':  { A:'Tutorial Room', B:'Tutorial Room', C:'Tutorial Room' },
-  'OM505':  { A:'CL3', B:'CL3', C:'CL3' },
-  'MK623':  { A:'Tutorial Room', B:'Tutorial Room', C:'Tutorial Room' },
-  'MK621':  { A:'CR6', B:'CR6', C:'CR6' },
-  'MK628':  { A:'CR6', B:'CR6', C:'CR6' },
-  'FN648':  { A:'CR6', B:'CR6', C:'CR6' },
-  'FN611':  { A:'CR6', B:'CR6', C:'CR6' },
-  'FN649':  { A:'CR6', B:'CR6', C:'CR6' },
-  'ST607':  { A:'CR6', B:'CR6', C:'CR6' },
-  'MK609':  { A:'Tutorial Room', B:'Tutorial Room', C:'Tutorial Room' },
-  // Term III — CR1/CR2/CR5 for A/B/C
-  'HR501':  { A:'CR1', B:'CR2', C:'CR5' },
-  'IS-608': { A:'CR1', B:'CR2', C:'CR5' },
-  'OM502':  { A:'CR1', B:'CR2', C:'CR5' },
-  'QM503':  { A:'CR1', B:'CR2', C:'CR5' },
-  'MK504':  { A:'CL1', B:'CL1', C:'CL1' },
-  'ST509(A)':{ A:'CR1', B:'CR2', C:'CR5' },
-  'FN502':  { A:'CR1', B:'CR2', C:'CR5' },
-  'GM502':  { A:'CR1', B:'CR2', C:'CR5' },
-};
-
-// TIME SLOTS
-const SLOTS_2025_27 = [
-  { slot:'I',   start:'08:30', end:'10:00' },
-  { slot:'II',  start:'10:15', end:'11:45' },
-  { slot:'III', start:'12:00', end:'13:30' },
-  { slot:'LUNCH', start:'13:30', end:'14:30', isLunch:true },
-  { slot:'IV',  start:'14:30', end:'16:00' },
-  { slot:'V',   start:'16:15', end:'17:45' },
-  { slot:'VI',  start:'18:00', end:'19:30' },
-];
-const SLOTS_2024_26 = [
-  { slot:'I',   start:'09:00', end:'10:30' },
-  { slot:'II',  start:'10:45', end:'12:15' },
-  { slot:'III', start:'12:30', end:'14:00' },
-  { slot:'LUNCH', start:'14:00', end:'15:00', isLunch:true },
-  { slot:'IV',  start:'15:00', end:'16:30' },
-  { slot:'V',   start:'16:45', end:'18:15' },
-  { slot:'VI',  start:'18:30', end:'20:00' },
-];
-
-const CATEGORIES = [
-  { id:'food',    icon:'🍔', label:'Food' },
-  { id:'travel',  icon:'🚌', label:'Travel' },
-  { id:'books',   icon:'📚', label:'Books' },
-  { id:'cafe',    icon:'☕', label:'Café' },
-  { id:'grocery', icon:'🛒', label:'Grocery' },
-  { id:'health',  icon:'💊', label:'Health' },
-  { id:'fun',     icon:'🎮', label:'Fun' },
-  { id:'other',   icon:'💰', label:'Other' },
-];
-
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-let currentUser = null;
-let timetableData = [];
-let lastFetchTime = null;
-let autoRefreshTimer = null;
-let pendingAIExpense = null;
-let notifScheduled = [];
-let selectedCat = null;
-
-const SHEET_ID = '1IOCuN6iHKFGMc7Lrej56miU3w6ZVRL0IG2a3RT2kra4';
-// ↓ Paste your deployed Apps Script URL here after setup
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxGLNwCRXro7CYnsn7RdzzvAeGI7yELFCKLzAp3U03_0HQ0aWzpDHoY6tXOaASycfD8Pw/exec';
-
-// ══════════════════════════════════════════
-// STORAGE HELPERS
-// ══════════════════════════════════════════
-const _store = {};
-function _save(key, val) { _store[key] = val; try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
-function _load(key, def) { if (_store[key] !== undefined) return _store[key]; try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
-function _remove(key) { delete _store[key]; try { localStorage.removeItem(key); } catch(e) {} }
-function saveUsers(users) { _save('campusai_users', users); }
-function getUsers() { return _load('campusai_users', {}); }
-function saveCurrentUser(u) { _save('campusai_current', u); }
-function loadCurrentUser() { return _load('campusai_current', null); }
-function getExpenses(email) { return _load('expenses_' + email, []); }
-function saveExpenses(email, arr) { _save('expenses_' + email, arr); }
-
-// ══════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', (tab==='login'?i===0:i===1)));
-  document.getElementById('login-form').style.display = tab==='login'?'block':'none';
-  document.getElementById('signup-form').style.display = tab==='signup'?'block':'none';
+function setMode(mode, el) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const ta = document.getElementById('topic-input');
+  ta.placeholder = mode === 'topic'
+    ? "e.g. 'Porter's Five Forces', 'Working Capital Management', 'Consumer Behaviour'..."
+    : "Paste your lecture notes, textbook paragraph, or any study material here...";
 }
 
-function onBatchChange() {
-  const batch = document.getElementById('su-batch').value;
-  const section = document.getElementById('su-section').value;
-  renderSubjectBasket(batch, section);
-}
-function onSectionChange() { onBatchChange(); }
-
-function renderSubjectBasket(batch, section) {
-  const wrap = document.getElementById('basket-wrap');
-  const basket = document.getElementById('subject-basket');
-  if (batch !== '2024-26') { wrap.style.display='none'; return; }
-  wrap.style.display = 'block';
-  const subjects = TERM_VI_SUBJECTS;
-  basket.innerHTML = subjects.map(s=>`
-    <label class="subject-item">
-      <input type="checkbox" value="${s.code}" name="subject_basket">
-      <span class="subject-code">${s.code}</span>
-      <span class="subject-name">${s.name}</span>
-    </label>
-  `).join('');
+function copyText(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = el.parentElement.querySelector('.copy-btn');
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); }
+  });
 }
 
-function doSignup() {
-  const name = document.getElementById('su-name').value.trim();
-  const email = document.getElementById('su-email').value.trim().toLowerCase();
-  const pass = document.getElementById('su-pass').value;
-  const batch = document.getElementById('su-batch').value;
-  const section = document.getElementById('su-section').value;
-  const errEl = document.getElementById('signup-error');
-  errEl.style.display='none';
+function toggleExamQ(el) {
+  el.classList.toggle('open');
+}
 
-  if (!name||!email||!pass||!batch||!section) { showError(errEl,'Please fill all fields.'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError(errEl,'Please enter a valid email address.'); return; }
-  if (pass.length < 6) { showError(errEl,'Password must be at least 6 characters.'); return; }
+async function callClaude(prompt) {
+  var GROQ_KEY = "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";
+  var url = "https://api.groq.com/openai/v1/chat/completions";
+  var text = (typeof prompt === "string") ? prompt : (Array.isArray(prompt) ? prompt.map(function(m){ return typeof m.content === "string" ? m.content : ""; }).join(" ") : "");
+  var resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + GROQ_KEY },
+    body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: text }], max_tokens: 2000, temperature: 0.7 })
+  });
+  var data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+}
 
-  let selectedSubjects = [];
-  if (batch === '2024-26') {
-    const checks = document.querySelectorAll('input[name=subject_basket]:checked');
-    selectedSubjects = Array.from(checks).map(c=>c.value);
-    if (selectedSubjects.length === 0) { showError(errEl,'Please select at least one subject from your basket.'); return; }
+function setSkeleton(id) {
+  // already set in HTML
+}
+
+function setContent(id, html) {
+  document.getElementById(id).innerHTML = html;
+}
+
+async function analyze() {
+  const input = document.getElementById('topic-input').value.trim();
+  if (!input) {
+    document.getElementById('topic-input').style.borderColor = 'var(--pink)';
+    setTimeout(() => document.getElementById('topic-input').style.borderColor = '', 1500);
+    return;
   }
 
-  const users = getUsers();
-  if (users[email]) { showError(errEl,'An account with this email already exists.'); return; }
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-text').textContent = 'Analyzing...';
 
-  const user = { name, email, pass, batch, section, subjects: selectedSubjects };
-  users[email] = user;
-  saveUsers(users);
-  loginUser(user);
-}
+  // Show results section with skeletons
+  const results = document.getElementById('results');
+  results.classList.add('show');
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-function doLogin() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const pass = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-error');
-  errEl.style.display='none';
-  const users = getUsers();
-  if (!users[email] || users[email].pass !== pass) { showError(errEl,'Invalid email or password.'); return; }
-  loginUser(users[email]);
-}
+  const isNotes = currentMode === 'notes';
+  const topicLabel = isNotes ? 'the following study material' : `the topic: "${input}"`;
 
-function loginUser(user) {
-  currentUser = user;
-  saveCurrentUser(user);
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  initApp();
-}
-
-function doLogout() {
-  currentUser = null;
-  _remove('campusai_current');
-  clearInterval(autoRefreshTimer);
-  notifScheduled = [];
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-}
-
-function showError(el, msg) { el.textContent = msg; el.style.display = 'block'; }
-
-// ══════════════════════════════════════════
-// APP INIT
-// ══════════════════════════════════════════
-function initApp() {
-  // Header
-  document.getElementById('hdr-name').textContent = currentUser.name.split(' ')[0];
-  document.getElementById('hdr-av').textContent = currentUser.name[0].toUpperCase();
-  document.getElementById('hdr-batch').textContent = `PGDM ${currentUser.batch} — Sec ${currentUser.section}`;
-
-  renderCatGrid();
-  renderProfileCard();
-  fetchTimetable();
-  renderExpenses();
-  renderAnalytics();
-
-  // Auto-refresh every 30 min
-  autoRefreshTimer = setInterval(fetchTimetable, 30 * 60 * 1000);
-  animateRefreshBar();
-
-  // Clock tick every minute
-  setInterval(()=>{ renderTimeline(); updateNextClassWidget(); }, 60000);
-  initWebhook();
-  updateAdminUI();
-  reapplyCorrections();
-  if (isAdmin()) { const s = document.getElementById('admin-settings-section'); if(s) s.style.display='block'; }
-  loadGASUrl();
-}
-
-function saveGASUrl(val) {
-  const url = val.trim();
-  _save('campusai_gas_url', url);
-  // Update the in-memory constant
-  window.GAS_URL_OVERRIDE = url;
-  const status = document.getElementById('gas-url-status');
-  if (url && url.startsWith('https://script.google.com')) {
-    status.textContent = '✅ Saved — will use on next refresh';
-    status.style.color = 'var(--green)';
-  } else if (url) {
-    status.textContent = '⚠️ URL looks wrong — should start with https://script.google.com';
-    status.style.color = 'var(--amber)';
-  } else {
-    status.textContent = 'No URL set — using CSV fallback';
-    status.style.color = 'var(--muted)';
-  }
-}
-
-function loadGASUrl() {
-  const saved = _load('campusai_gas_url', '');
-  const active = saved || GAS_URL;
-  window.GAS_URL_OVERRIDE = active; // always set, even if empty string
-  const inp = document.getElementById('gas-url-input');
-  if (inp) inp.value = active;
-  const status = document.getElementById('gas-url-status');
-  if (status && active) {
-    status.textContent = saved ? '✅ Custom URL active' : '✅ Using built-in Apps Script URL';
-    status.style.color = 'var(--green)';
-  }
-}
-
-// ══════════════════════════════════════════
-// TIMETABLE FETCH (Google Sheets CSV)
-// ══════════════════════════════════════════
-async function fetchTimetable() {
-  const btn = document.getElementById('refresh-btn');
-  btn.classList.add('spinning');
-
-  // ── Try Apps Script JSON endpoint first (most reliable) ──
-  const activeGASUrl = window.GAS_URL_OVERRIDE || GAS_URL;
-  console.log('[CampusAI] Using GAS URL:', activeGASUrl ? activeGASUrl.substring(0,60)+'...' : 'NONE');
-  if (activeGASUrl) {
-    try {
-      const resp = await fetch(activeGASUrl);
-      if (!resp.ok) throw new Error('GAS fetch failed: ' + resp.status);
-      const json = await resp.json();
-      if (json.error) throw new Error('GAS error: ' + json.error);
-
-      // Convert date strings back to Date objects
-      timetableData = json.entries.map(e => ({
-        ...e,
-        date: new Date(e.date)
-      }));
-
-      // Re-apply any admin corrections on top
-      reapplyCorrections();
-
-      lastFetchTime = new Date();
-      document.getElementById('last-refresh-text').textContent = 'Live ✓';
-      document.getElementById('last-fetch-time').textContent = lastFetchTime.toLocaleTimeString();
-      renderTimeline(); updateNextClassWidget(); scheduleNotifications();
-      btn.classList.remove('spinning');
-      console.log('[CampusAI] Loaded', timetableData.length, 'entries via Apps Script');
-      return;
-    } catch(e) {
-      console.warn('[CampusAI] Apps Script fetch failed, trying CSV:', e.message);
-    }
-  }
-
-  // ── Fallback: raw CSV from Google Sheets ──
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('CSV fetch failed');
-    const csv = await resp.text();
-    timetableData = parseScheduleCSV(csv);
-    reapplyCorrections();
-    lastFetchTime = new Date();
-    document.getElementById('last-refresh-text').textContent = 'Just now';
-    document.getElementById('last-fetch-time').textContent = lastFetchTime.toLocaleTimeString();
-    renderTimeline(); updateNextClassWidget(); scheduleNotifications();
-    console.log('[CampusAI] Loaded', timetableData.length, 'entries via CSV');
-  } catch(e) {
-    console.warn('[CampusAI] All fetches failed, using hardcoded fallback:', e.message);
-    timetableData = FALLBACK_DATA;
-    reapplyCorrections();
-    renderTimeline(); updateNextClassWidget();
-    document.getElementById('last-refresh-text').textContent = 'Offline';
-  }
-  btn.classList.remove('spinning');
-}
+    // Sequential calls to avoid rate limiting
+    const delay = ms => new Promise(r => setTimeout(r, ms));
 
-function forceRefresh() { fetchTimetable(); }
+    btn.querySelector('.btn-text').textContent = '1/6 Simple explanation...';
+    const eli5 = await callClaude(`Explain ${topicLabel} in simple, friendly language a 12-year-old could understand. Use a fun analogy or real-life example. Keep it to 3-4 short paragraphs. No jargon. ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+    setContent('eli5-body', eli5.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+    await delay(500);
 
-// Parse the CSV from the Google Sheet
-// Parse date string from Apps Script (e.g. "Thu Mar 12 2026") → Date object
-function parseGASDate(str) {
-  const d = new Date(str);
-  return isNaN(d) ? null : d;
-}
+    btn.querySelector('.btn-text').textContent = '2/6 Academic view...';
+    const academic = await callClaude(`Give a comprehensive academic explanation of ${topicLabel}. Include key theoretical frameworks, definitions, and scholarly context. Write like a textbook. 3-4 paragraphs. ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+    setContent('academic-body', academic.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+    await delay(500);
 
-// Robust RFC-4180 CSV parser — handles quoted fields with commas inside
-function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i+1] === '"') { cur += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
-      result.push(cur.trim()); cur = '';
-    } else {
-      cur += ch;
+    btn.querySelector('.btn-text').textContent = '3/6 Real world...';
+    const practical = await callClaude(`Explain how ${topicLabel} works in the real business world. Give 2-3 concrete company examples. 3-4 paragraphs. ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+    setContent('practical-body', practical.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+    await delay(500);
+
+    btn.querySelector('.btn-text').textContent = '4/6 Key points...';
+    const compression = await callClaude(`For ${topicLabel}, provide:\n1. A single punchy sentence (under 20 words). Label it SUMMARY:\n2. Exactly 5 key points. Label each POINT1:, POINT2:, POINT3:, POINT4:, POINT5: ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+    await delay(500);
+
+    btn.querySelector('.btn-text').textContent = '5/6 Exam questions...';
+    const examRaw = await callClaude(`Generate exactly 3 exam questions about ${topicLabel} with model answers.\nFormat:\nQ1: [question]\nA1: [answer]\nQ2: [question]\nA2: [answer]\nQ3: [question]\nA3: [answer] ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+    await delay(500);
+
+    btn.querySelector('.btn-text').textContent = '6/6 Mind map...';
+    const mindmapRaw = await callClaude(`Create a mind map for ${topicLabel}.\nFormat:\nROOT: [Topic]\nBRANCH: [category]\nLEAF: [point]\nLEAF: [point]\nBRANCH: [category]\nLEAF: [point]\nLEAF: [point]\nBRANCH: [category]\nLEAF: [point]\nLEAF: [point]\nBRANCH: [category]\nLEAF: [point]\nLEAF: [point] ${isNotes ? `\n\nMaterial:\n${input}` : ''}`);
+
+        // ── Render ELI5 ──
+    setContent('eli5-body', eli5.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+
+    // ── Render Academic ──
+    setContent('academic-body', academic.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+
+    // ── Render Practical ──
+    setContent('practical-body', practical.split('\n').filter(l=>l.trim()).map(p => `<p style="margin-bottom:10px">${p}</p>`).join(''));
+
+    // ── Render Summary + Key Points ──
+    const summaryMatch = compression.match(/SUMMARY:\s*(.+)/i);
+    const summary = summaryMatch ? summaryMatch[1].trim() : compression.split('\n')[0];
+    setContent('summary-text', `"${summary}"`);
+
+    const points = [];
+    for (let i = 1; i <= 5; i++) {
+      const m = compression.match(new RegExp(`POINT${i}:\\s*(.+)`, 'i'));
+      if (m) points.push(m[1].trim());
     }
-  }
-  result.push(cur.trim());
-  return result;
-}
-
-function parseScheduleCSV(csv) {
-  const rawLines = csv.split('\n');
-  const lines = rawLines.map(l => parseCSVLine(l));
-  const results = [];
-  let currentDate = null;
-
-  // First pass: detect column structure from header rows
-  // Look for a row that contains slot labels like "Slot I", "I", etc.
-  let slotColMap = null; // will map slotKey → column index
-  let lunchCol = -1;
-
-  for (let i = 0; i < Math.min(10, lines.length); i++) {
-    const row = lines[i];
-    const rowStr = row.join(' ').toUpperCase();
-    // Look for slot markers
-    if (rowStr.includes('SLOT') || (rowStr.includes(' I ') && rowStr.includes(' II '))) {
-      const map = {};
-      row.forEach((cell, idx) => {
-        const c = cell.toUpperCase().trim();
-        if (c === 'I' || c === 'SLOT I')   map['I']   = idx;
-        if (c === 'II' || c === 'SLOT II')  map['II']  = idx;
-        if (c === 'III'|| c === 'SLOT III') map['III'] = idx;
-        if (c === 'IV' || c === 'SLOT IV')  map['IV']  = idx;
-        if (c === 'V' || c === 'SLOT V')    map['V']   = idx;
-        if (c === 'VI' || c === 'SLOT VI')  map['VI']  = idx;
-        if (c.includes('LUNCH'))            lunchCol   = idx;
-      });
-      if (Object.keys(map).length >= 4) { slotColMap = map; break; }
+    if (points.length === 0) {
+      // fallback: extract numbered lines
+      compression.split('\n').filter(l => /^\d\./.test(l.trim())).slice(0,5).forEach(l => points.push(l.replace(/^\d\.\s*/,'')));
     }
-  }
+    setContent('key-points', points.map((p,i) => `
+      <li class="key-point">
+        <div class="kp-num">${i+1}</div>
+        <span>${p}</span>
+      </li>`).join(''));
 
-  // Fallback column map if header detection failed
-  // Structure: col0=Sr, col1=Date&Day, col2=Batch&Section, col3=SlotI, col4=SlotII, col5=SlotIII, col6=LUNCH, col7=SlotIV, col8=SlotV, col9=SlotVI
-  // OR older: col0=Sr/Date, col1=Batch, col2=SlotI, col3=SlotII, col4=SlotIII, col5=LUNCH, col6=SlotIV, col7=SlotV, col8=SlotVI
-  if (!slotColMap) {
-    slotColMap = { 'I':3, 'II':4, 'III':5, 'IV':7, 'V':8, 'VI':9 };
-    lunchCol = 6;
-    console.log('[CampusAI] No slot header found — using default column map');
-  } else {
-    console.log('[CampusAI] Detected slot column map:', slotColMap);
-  }
+    // ── Render Exam Questions ──
+    const qMatches = [...examRaw.matchAll(/Q(\d):\s*(.+?)(?=\nA\d:|$)/gs)];
+    const aMatches = [...examRaw.matchAll(/A(\d):\s*(.+?)(?=\nQ\d:|$)/gs)];
+    const examHtml = qMatches.map((qm, i) => {
+      const ans = aMatches[i] ? aMatches[i][2].trim() : '';
+      return `<div class="exam-q" onclick="this.classList.toggle('open')">
+        <div class="exam-q-num">Question ${i+1}</div>
+        <div>${qm[2].trim()}</div>
+        ${ans ? `<div class="exam-ans">💡 <strong>Model Answer:</strong> ${ans}</div>` : ''}
+      </div>`;
+    }).join('');
+    setContent('exam-questions', examHtml || '<div style="color:var(--muted);font-size:13px">Could not parse questions</div>');
 
-  const SKIP_VALS = new Set(['', '-', 'conference', 'lunch', 'break', 'holiday', 'n/a', 'na']);
-
-  for (let i = 0; i < lines.length; i++) {
-    const row = lines[i];
-    if (!row || row.length < 3) continue;
-    const rowFull = row.join(' ');
-
-    // Detect date anywhere in row
-    const dateMatch = rowFull.match(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)[,\s]+(\w+)\s+(\d{1,2})[,\s]+(\d{4})/i);
-    if (dateMatch) {
-      const parsed = new Date(dateMatch[0].replace(/,/g, ''));
-      if (!isNaN(parsed)) {
-        currentDate = parsed;
-        console.log('[CampusAI] Date detected:', currentDate.toDateString(), '| row', i, ':', row.slice(0,4));
-      }
-      continue; // date rows don't have batch info
-    }
-
-    // Detect batch+section — handle various dash/hyphen variants and spacing
-    const batchMatch = rowFull.match(/PGDM\s*(2025-27|2024-26)\s*[-–—\s]+\s*([A-C])\b/i);
-    if (!batchMatch || !currentDate) continue;
-
-    const batch = batchMatch[1], section = batchMatch[2].toUpperCase();
-    const entry = { date: new Date(currentDate), batch, section, slots: {} };
-
-    Object.entries(slotColMap).forEach(([slotKey, colIdx]) => {
-      const val = (row[colIdx] || '').trim().replace(/^"+|"+$/g, '');
-      if (val && !SKIP_VALS.has(val.toLowerCase())) {
-        entry.slots[slotKey] = val;
+    // ── Render Mind Map ──
+    const mmLines = mindmapRaw.split('\n').map(l => l.trim()).filter(Boolean);
+    let mmHtml = '';
+    mmLines.forEach(line => {
+      if (line.startsWith('ROOT:')) {
+        mmHtml += `<div class="mm-root">◆ ${line.replace('ROOT:','').trim()}</div>`;
+      } else if (line.startsWith('BRANCH:')) {
+        mmHtml += `<div class="mm-branch">${line.replace('BRANCH:','').trim()}</div>`;
+      } else if (line.startsWith('LEAF:')) {
+        mmHtml += `<div class="mm-leaf">${line.replace('LEAF:','').trim()}</div>`;
       }
     });
-
-    if (Object.keys(entry.slots).length > 0) {
-      results.push(entry);
-    }
-  }
-
-  console.log('[CampusAI] Total parsed entries:', results.length);
-  return results;
-}
-
-// Hardcoded timetable from Google Sheet — works offline
-// Dates: Jan 5 2026 – Mar 26 2026 (Term III & Term VI)
-function buildHardcodedData() {
-  // Each entry: [dateStr, batch, section, slotI, slotII, slotIII, slotIV, slotV, slotVI]
-  // Empty string = no class that slot
-  const RAW = [
-    // ─── WEEK 1: Jan 5-10 ───
-    ['Mon Jan 5 2026','2025-27','A','','','OM502','QM503','',''],
-    ['Mon Jan 5 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Mon Jan 5 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Mon Jan 5 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Mon Jan 5 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Mon Jan 5 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Tue Jan 6 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Jan 6 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Jan 6 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Jan 6 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Jan 6 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Jan 6 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Jan 7 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Jan 7 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Jan 7 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Jan 7 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 7 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 7 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Jan 8 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Jan 8 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Jan 8 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Jan 8 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 8 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 8 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Jan 9 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Jan 9 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Jan 9 2026','2024-26','C','','OB623','IS623','','',''],
-    // ─── WEEK 2: Jan 12-17 ───
-    ['Mon Jan 12 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Jan 12 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Jan 12 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Jan 12 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Jan 12 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Jan 12 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Jan 13 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Jan 13 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Jan 13 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Jan 13 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Jan 13 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Jan 13 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Jan 14 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Jan 14 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Jan 14 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Jan 14 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 14 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 14 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Jan 15 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Jan 15 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Jan 15 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Jan 15 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 15 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 15 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Jan 16 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Fri Jan 16 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Fri Jan 16 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Fri Jan 16 2026','2024-26','A','','OB623','IS623','MK621','',''],
-    ['Fri Jan 16 2026','2024-26','B','','OB623','IS623','MK621','',''],
-    ['Fri Jan 16 2026','2024-26','C','','OB623','IS623','MK621','',''],
-    ['Sat Jan 17 2026','2025-27','A','','FN502','OM502','QM503','',''],
-    ['Sat Jan 17 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Jan 17 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Jan 17 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 17 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 17 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    // ─── WEEK 3: Jan 19-24 ───
-    ['Mon Jan 19 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Jan 19 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Jan 19 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Jan 19 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Jan 19 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Jan 19 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Jan 20 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Jan 20 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Jan 20 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Jan 20 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Jan 20 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Jan 20 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Jan 21 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Jan 21 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Jan 21 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Jan 21 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 21 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 21 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Jan 22 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Jan 22 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Jan 22 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Jan 22 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 22 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 22 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Jan 23 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Jan 23 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Jan 23 2026','2024-26','C','','OB623','IS623','','',''],
-    ['Sat Jan 24 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Jan 24 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Jan 24 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Jan 24 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 24 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 24 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    // ─── WEEK 4: Jan 26-31 ───
-    ['Tue Jan 27 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Jan 27 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Jan 27 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Jan 27 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Jan 27 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Jan 27 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Jan 28 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Jan 28 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Jan 28 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Jan 28 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 28 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Jan 28 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Jan 29 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Jan 29 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Jan 29 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Jan 29 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 29 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Jan 29 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Jan 30 2026','2024-26','A','','OB623','IS623','MK621','',''],
-    ['Fri Jan 30 2026','2024-26','B','','OB623','IS623','MK621','',''],
-    ['Fri Jan 30 2026','2024-26','C','','OB623','IS623','MK621','',''],
-    ['Sat Jan 31 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Jan 31 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Jan 31 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Jan 31 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 31 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Jan 31 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    // ─── FEBRUARY ───
-    ['Mon Feb 2 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Feb 2 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Feb 2 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Feb 2 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Feb 2 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Feb 2 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Feb 3 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Feb 3 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Feb 3 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Feb 3 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Feb 3 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Feb 3 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Feb 4 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Feb 4 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Feb 4 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Feb 4 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Feb 4 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Feb 4 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Feb 5 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Feb 5 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Feb 5 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Feb 5 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Feb 5 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Feb 5 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Feb 6 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Feb 6 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Feb 6 2026','2024-26','C','','OB623','IS623','','',''],
-    ['Sat Feb 7 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Feb 7 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Feb 7 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Feb 7 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Feb 7 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Feb 7 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Mon Feb 9 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Feb 9 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Feb 9 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Feb 9 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Feb 9 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Feb 9 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Feb 10 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Feb 10 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Feb 10 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Feb 10 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Feb 10 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Feb 10 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Feb 11 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Feb 11 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Feb 11 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Feb 11 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Feb 11 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Feb 11 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Feb 12 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Feb 12 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Feb 12 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Feb 12 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Feb 12 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Feb 12 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Feb 13 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Feb 13 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Feb 13 2026','2024-26','C','','OB623','IS623','','',''],
-    ['Sat Feb 14 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Feb 14 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Feb 14 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Feb 14 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Feb 14 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Feb 14 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    // ─── MARCH ───
-    ['Mon Mar 2 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Mar 2 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Mar 2 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Mar 2 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 2 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 2 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Mar 3 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Mar 3 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Mar 3 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Mar 3 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Mar 3 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Mar 3 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Mar 4 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Mar 4 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Mar 4 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Mar 4 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 4 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 4 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Mar 5 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Mar 5 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Mar 5 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Mar 5 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 5 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 5 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Mar 6 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Mar 6 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Mar 6 2026','2024-26','C','','OB623','IS623','','',''],
-    ['Sat Mar 7 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Mar 7 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Mar 7 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Mar 7 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Mar 7 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Mar 7 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    // Mar 9 — from sheet (week pattern)
-    ['Mon Mar 9 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Mar 9 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Mar 9 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Mar 9 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621(CR6)','IS615'],
-    ['Mon Mar 9 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621(CR6)','IS615'],
-    ['Mon Mar 9 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621(CR6)','IS615'],
-    // Mar 10 — from sheet (Tue)
-    ['Tue Mar 10 2026','2025-27','A','IS-608(A)','FN502(A)','HR501(A)','','ST509(A)(A)',''],
-    ['Tue Mar 10 2026','2025-27','B','','GM502(B)','OM502(B)','','HR501(B)','QM503(B)'],
-    ['Tue Mar 10 2026','2025-27','C','','QM503(C)','ST509(A)(C)','','OM502(C)',''],
-    ['Tue Mar 10 2026','2024-26','A','FN648','FN649','MK609 (CR6)','','OB621(CR6)','MK621'],
-    ['Tue Mar 10 2026','2024-26','B','FN648','FN649','MK609 (CR6)','','OB621(CR6)','MK621'],
-    ['Tue Mar 10 2026','2024-26','C','FN648','FN649','MK609 (CR6)','','OB621(CR6)','MK621'],
-    // Mar 11 — accurately read from screenshot
-    ['Wed Mar 11 2026','2025-27','A','','IS-608(A)','FN502(A)','HR501(A)','ST509(A)(A)',''],
-    ['Wed Mar 11 2026','2025-27','B','','GM502(B)','OM502(B)','HR501(B)','QM503(B)',''],
-    ['Wed Mar 11 2026','2025-27','C','','QM503(C)','ST509(A)(C)','OM502(C)','',''],
-    ['Wed Mar 11 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 11 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 11 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    // Mar 12
-    ['Thu Mar 12 2026','2025-27','A','','IS-608(A)','','ST509(A)(A)','',''],
-    ['Thu Mar 12 2026','2025-27','B','','ST509(A)(B)','','','',''],
-    ['Thu Mar 12 2026','2025-27','C','','IS-608(C)','GM502(C)','','',''],
-    ['Thu Mar 12 2026','2024-26','A','MK609 (CR6)','MK623/FN648','OB622/IS615','MK623/MK628','FN611',''],
-    ['Thu Mar 12 2026','2024-26','B','MK609 (CR6)','MK623/FN648','OB622/IS615','MK623/MK628','FN611',''],
-    ['Thu Mar 12 2026','2024-26','C','MK609 (CR6)','MK623/FN648','OB622/IS615','MK623/MK628','FN611',''],
-    // Mar 13
-    ['Fri Mar 13 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Mar 13 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Mar 13 2026','2024-26','C','','OB623','IS623','','',''],
-    // Mar 14
-    ['Sat Mar 14 2026','2025-27','A','','FN502(A)','OM502(A)','QM503(A)','IS-608(A)',''],
-    ['Sat Mar 14 2026','2025-27','B','HR501(B)','IS-608(B)','OM502(B)','QM503(B)','',''],
-    ['Sat Mar 14 2026','2025-27','C','IS-608(C)','','ST509(A)(C)','HR501(C)','',''],
-    ['Sat Mar 14 2026','2024-26','A','MK621','OB622/IS615','IS623','','FN649',''],
-    ['Sat Mar 14 2026','2024-26','B','MK621','OB622/IS615','IS623','','FN649',''],
-    ['Sat Mar 14 2026','2024-26','C','MK621','OB622/IS615','IS623','','FN649',''],
-    ['Mon Mar 16 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Mar 16 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Mar 16 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Mar 16 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 16 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 16 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Mar 17 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Mar 17 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Mar 17 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Mar 17 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Mar 17 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Mar 17 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Mar 18 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Mar 18 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Mar 18 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Mar 18 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 18 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 18 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Mar 19 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Mar 19 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Mar 19 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Mar 19 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 19 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 19 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Fri Mar 20 2026','2024-26','A','','OB623','IS623','','',''],
-    ['Fri Mar 20 2026','2024-26','B','','OB623','IS623','','',''],
-    ['Fri Mar 20 2026','2024-26','C','','OB623','IS623','','',''],
-    ['Sat Mar 21 2026','2025-27','A','','FN502','OM502','QM503','IS-608',''],
-    ['Sat Mar 21 2026','2025-27','B','HR501','IS-608','','OM502','QM503',''],
-    ['Sat Mar 21 2026','2025-27','C','IS-608','','','HR501','',''],
-    ['Sat Mar 21 2026','2024-26','A','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Mar 21 2026','2024-26','B','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Sat Mar 21 2026','2024-26','C','MK621','OB622/IS615','','IS623','FN649',''],
-    ['Mon Mar 23 2026','2025-27','A','','FN502','OM502','QM503','ST509(A)',''],
-    ['Mon Mar 23 2026','2025-27','B','','HR501','IS-608','OM502','QM503',''],
-    ['Mon Mar 23 2026','2025-27','C','','IS-608','ST509(A)','HR501','',''],
-    ['Mon Mar 23 2026','2024-26','A','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 23 2026','2024-26','B','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Mon Mar 23 2026','2024-26','C','MK621','MK621','OB622/IS615','IS623','OB621',''],
-    ['Tue Mar 24 2026','2025-27','A','','IS-608','HR501','OM502','',''],
-    ['Tue Mar 24 2026','2025-27','B','ST509(A)','IS-608','','','',''],
-    ['Tue Mar 24 2026','2025-27','C','OM502','ST509(A)','','HR501','',''],
-    ['Tue Mar 24 2026','2024-26','A','OM505','MK623/FN648','MK623/MK628','ST607','FN611',''],
-    ['Tue Mar 24 2026','2024-26','B','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Tue Mar 24 2026','2024-26','C','OM505','MK623/FN648','MK623/MK628','','FN611',''],
-    ['Wed Mar 25 2026','2025-27','A','','FN502','HR501','ST509(A)','',''],
-    ['Wed Mar 25 2026','2025-27','B','','','OM502','HR501','',''],
-    ['Wed Mar 25 2026','2025-27','C','','QM503','ST509(A)','OM502','QM503',''],
-    ['Wed Mar 25 2026','2024-26','A','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 25 2026','2024-26','B','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Wed Mar 25 2026','2024-26','C','FN648','FN649','MK609 (CR6)','OB621(CR6)','MK621','IS615'],
-    ['Thu Mar 26 2026','2025-27','A','','','IS-608','ST509(A)','',''],
-    ['Thu Mar 26 2026','2025-27','B','','','ST509(A)','','',''],
-    ['Thu Mar 26 2026','2025-27','C','','IS-608','GM502','','',''],
-    ['Thu Mar 26 2026','2024-26','A','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 26 2026','2024-26','B','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-    ['Thu Mar 26 2026','2024-26','C','MK609','MK623/FN648','OB622/IS615/OM505','MK623/MK628','FN611',''],
-  ];
-
-  const SLOT_KEYS = ['I','II','III','IV','V','VI'];
-  return RAW.map(r => ({
-    date: new Date(r[0]),
-    batch: r[1],
-    section: r[2],
-    slots: Object.fromEntries(SLOT_KEYS.map((k,i) => [k, r[3+i]]).filter(([,v])=>v))
-  }));
-}
-const FALLBACK_DATA = buildHardcodedData();
-
-
-// ══════════════════════════════════════════
-// TIMELINE RENDER
-// ══════════════════════════════════════════
-function getTodayClasses() {
-  const todayStr = new Date().toDateString();
-  const cls = getClassesForDate(todayStr);
-  return cls.length ? cls : null;
-}
-
-function timeToMins(t) {
-  const [h,m] = t.split(':').map(Number);
-  return h*60+m;
-}
-
-function nowMins() {
-  const n=new Date(); return n.getHours()*60+n.getMinutes();
-}
-
-function renderTimeline() {
-  const wrap = document.getElementById('timeline-wrap');
-  const now = nowMins();
-  const todayClasses = getTodayClasses();
-
-  // Date display
-  const today = new Date();
-  document.getElementById('today-date-big').textContent =
-    today.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long'});
-  document.getElementById('today-sub-text').textContent =
-    `PGDM ${currentUser.batch} · Section ${currentUser.section}`;
-
-  const h = today.getHours();
-  const greet = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('greeting-text').textContent = greet + ', ' + currentUser.name.split(' ')[0] + ' 👋';
-
-  if (!todayClasses || todayClasses.length === 0) {
-    wrap.innerHTML = `<div class="empty-day"><span class="emoji">🎉</span><p>No classes today!</p><small>Enjoy your day off</small></div>`;
-    return;
-  }
-
-  let html = '';
-  const items = todayClasses;
-
-  items.forEach((cls, idx) => {
-    if (cls.isLunch) return; // lunch removed
-
-    const sMin = timeToMins(cls.start), eMin = timeToMins(cls.end);
-    let status = 'upcoming';
-    if (now > eMin) status = 'past';
-    else if (now >= sMin) status = 'now';
-
-    // Find if this is the next class
-    const isNext = status === 'upcoming' && !items.slice(0,idx).some(c=>!c.isLunch && timeToMins(c.start)>now && timeToMins(c.start)<sMin);
-
-    html += `
-      <div class="tl-item">
-        <div class="tl-time">${cls.start}<br><span style="font-size:10px;opacity:.6">${cls.end}</span></div>
-        <div class="tl-spine">
-          <div class="tl-dot ${status}"></div>
-          ${idx < items.length-1 ? '<div class="tl-line"></div>' : ''}
-        </div>
-        <div class="tl-card ${status}">
-          <div class="tl-subject">${cls.name}</div>
-          <div class="tl-details">
-            <div class="tl-chip">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h8"/></svg>
-              ${cls.code}
-            </div>
-            <div class="tl-chip">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              ${cls.venue}
-            </div>
-            <button class="report-btn" onclick="openReportModal('${new Date().toDateString()}','${cls.slot}','${cls.code}','${cls.name.replace(/'/g,"\'")}','${cls.venue}','${cls.start}')">🚩</button>
-          </div>
-          <span class="tl-status ${status==='now'?'status-now':status==='past'?'status-done':isNext?'status-next':''}">
-            ${status==='now'?'● Live':status==='past'?'Done':isNext?'Next':''}
-          </span>
-        </div>
-      </div>`;
-  });
-
-  wrap.innerHTML = html;
-}
-
-function updateNextClassWidget() {
-  const widget = document.getElementById('next-class-widget');
-  const classes = getTodayClasses();
-  if (!classes) { widget.style.display='none'; return; }
-  const now = nowMins();
-  const next = classes.find(c => !c.isLunch && timeToMins(c.start) > now);
-  if (!next) { widget.style.display='none'; return; }
-  widget.style.display='block';
-  document.getElementById('ncw-subject').textContent = next.name;
-  document.getElementById('ncw-meta').textContent = next.venue;
-  document.getElementById('ncw-time').textContent = next.start;
-  const diff = timeToMins(next.start) - now;
-  document.getElementById('ncw-cd').textContent = diff < 60 ? `in ${diff} mins` : `in ${Math.floor(diff/60)}h ${diff%60}m`;
-}
-
-// ══════════════════════════════════════════
-// NOTIFICATIONS
-// ══════════════════════════════════════════
-async function toggleNotifications() {
-  const tog = document.getElementById('notif-toggle');
-  if (tog.checked) {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') { tog.checked = false; alert('Please allow notifications in your browser settings.'); return; }
-    scheduleNotifications();
-  }
-}
-
-function scheduleNotifications() {
-  notifScheduled.forEach(t => clearTimeout(t));
-  notifScheduled = [];
-  if (!document.getElementById('notif-toggle')?.checked) return;
-  const classes = getTodayClasses();
-  if (!classes) return;
-  const now = new Date();
-  classes.forEach(cls => {
-    if (cls.isLunch) return;
-    const [h,m] = cls.start.split(':').map(Number);
-    const classTime = new Date(); classTime.setHours(h,m,0,0);
-    const notifTime = new Date(classTime.getTime() - 10*60000);
-    const delay = notifTime - now;
-    if (delay > 0) {
-      const t = setTimeout(()=>{
-        new Notification('⚡ CampusAI — Class Reminder', {
-          body: `${cls.name} starts at ${cls.start} in ${cls.venue}`,
-          icon: '📅'
-        });
-      }, delay);
-      notifScheduled.push(t);
-    }
-  });
-}
-
-// ══════════════════════════════════════════
-// EXPENSE TRACKER
-// ══════════════════════════════════════════
-function renderCatGrid() {
-  const grid = document.getElementById('cat-grid');
-  grid.innerHTML = CATEGORIES.map(c=>`
-    <div class="cat-btn" onclick="selectCat('${c.id}',this)">
-      <span class="cat-icon">${c.icon}</span>${c.label}
-    </div>`).join('');
-}
-
-function selectCat(id, el) {
-  selectedCat = id;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function addExpense(amount, desc, cat, source) {
-  const amtInput = document.getElementById('exp-amount');
-  const descInput = document.getElementById('exp-desc');
-  const amt = amount || parseFloat(amtInput.value);
-  const d = desc || descInput.value.trim() || 'Expense';
-  const c = cat || selectedCat || 'other';
-  const s = source || 'Manual';
-  if (!amt || amt <= 0) { amtInput.style.borderColor='var(--pink)'; setTimeout(()=>amtInput.style.borderColor='',1000); return; }
-
-  const expenses = getExpenses(currentUser.email);
-  expenses.unshift({ id: Date.now(), amount:amt, desc:d, cat:c, source:s, date: new Date().toISOString() });
-  saveExpenses(currentUser.email, expenses);
-
-  amtInput.value = '';
-  descInput.value = '';
-  selectedCat = null;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('selected'));
-  renderExpenses();
-  renderAnalytics();
-}
-
-function renderExpenses() {
-  const list = document.getElementById('expense-list');
-  const expenses = getExpenses(currentUser.email);
-  document.getElementById('exp-count-badge').textContent = expenses.length + ' entries';
-  if (expenses.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No expenses yet — add your first one above 👆</div>`;
-    return;
-  }
-  const catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
-  list.innerHTML = expenses.slice(0,30).map(e => {
-    const cat = catMap[e.cat] || catMap.other;
-    const date = new Date(e.date);
-    const dateStr = date.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ', ' + date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    return `<div class="expense-item">
-      <div class="exp-icon" style="background:var(--surface3)">${cat.icon}</div>
-      <div class="exp-info">
-        <div class="exp-desc">${e.desc}</div>
-        <div class="exp-meta">${cat.label} · ${e.source} · ${dateStr}</div>
-      </div>
-      <div class="exp-amount">−₹${e.amount}</div>
-      <button class="exp-del" onclick="deleteExpense(${e.id})">×</button>
-    </div>`;
-  }).join('');
-}
-
-function deleteExpense(id) {
-  let expenses = getExpenses(currentUser.email).filter(e=>e.id!==id);
-  saveExpenses(currentUser.email, expenses);
-  renderExpenses(); renderAnalytics();
-}
-
-function clearExpenses() {
-  if (!confirm('Delete all expense records? This cannot be undone.')) return;
-  saveExpenses(currentUser.email, []);
-  renderExpenses(); renderAnalytics();
-}
-
-// ══════════════════════════════════════════
-// SMS SIMULATOR
-// ══════════════════════════════════════════
-function simulateSMS(el, amount, source, merchant) { triggerAIPopup(amount, source, merchant); }
-
-function confirmAIExpense() {
-  if (!pendingAIExpense) return;
-  const desc = document.getElementById('ai-desc-input').value.trim() || pendingAIExpense.merchant;
-  const catGuess = guessCategory(desc, pendingAIExpense.merchant);
-  addExpense(pendingAIExpense.amount, desc, catGuess, pendingAIExpense.source);
-  closeAIPopup();
-  switchTab('expenses');
-}
-
-function closeAIPopup() {
-  document.getElementById('ai-popup').classList.remove('show');
-  pendingAIExpense = null;
-}
-
-function guessCategory(desc, merchant) {
-  const text = (desc + ' ' + merchant).toLowerCase();
-  if (/swiggy|zomato|food|lunch|dinner|chai|meal|restaurant|cafe|coffee/.test(text)) return 'cafe';
-  if (/auto|ola|uber|bus|train|metro|travel|cab|rickshaw/.test(text)) return 'travel';
-  if (/book|notes|stationery|pen|xerox|print/.test(text)) return 'books';
-  if (/medicine|health|pharma|doctor/.test(text)) return 'health';
-  if (/grocer|bigbasket|blinkit|zepto|mart/.test(text)) return 'grocery';
-  if (/game|netflix|prime|movie|fun/.test(text)) return 'fun';
-  return 'other';
-}
-
-// ══════════════════════════════════════════
-// ANALYTICS
-// ══════════════════════════════════════════
-function renderAnalytics() {
-  const expenses = getExpenses(currentUser.email);
-  const now = new Date();
-  const thisMonth = expenses.filter(e=>{ const d=new Date(e.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
-  const total = thisMonth.reduce((s,e)=>s+e.amount,0);
-  const avg = thisMonth.length ? (total/now.getDate()).toFixed(0) : 0;
-  const topCat = (() => {
-    const map = {};
-    thisMonth.forEach(e=>{ map[e.cat]=(map[e.cat]||0)+e.amount; });
-    const top = Object.entries(map).sort((a,b)=>b[1]-a[1])[0];
-    return top ? CATEGORIES.find(c=>c.id===top[0])?.label : '—';
-  })();
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card" style="--glow-clr:rgba(79,142,255,.15)">
-      <div class="stat-label">This Month</div>
-      <div class="stat-value" style="color:var(--accent)">₹${total.toLocaleString('en-IN')}</div>
-      <div class="stat-sub">${thisMonth.length} transactions</div>
-    </div>
-    <div class="stat-card" style="--glow-clr:rgba(61,255,160,.15)">
-      <div class="stat-label">Daily Average</div>
-      <div class="stat-value" style="color:var(--green)">₹${avg}</div>
-      <div class="stat-sub">per day so far</div>
-    </div>
-    <div class="stat-card" style="--glow-clr:rgba(255,79,142,.15)">
-      <div class="stat-label">Top Category</div>
-      <div class="stat-value" style="color:var(--pink);font-size:20px">${topCat}</div>
-      <div class="stat-sub">most spending</div>
-    </div>`;
-
-  // Bar chart — last 10 days
-  const barChart = document.getElementById('bar-chart');
-  const days = [];
-  for (let i=9;i>=0;i--) {
-    const d = new Date(); d.setDate(d.getDate()-i);
-    const dayExp = expenses.filter(e=>new Date(e.date).toDateString()===d.toDateString());
-    const sum = dayExp.reduce((s,e)=>s+e.amount,0);
-    days.push({ label: d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}), val: sum });
-  }
-  const maxVal = Math.max(...days.map(d=>d.val), 1);
-  barChart.innerHTML = days.map(d=>`
-    <div class="bar-wrap">
-      <span class="bar-val" style="color:var(--muted);font-size:9px">${d.val?'₹'+d.val:''}</span>
-      <div class="bar" style="height:${Math.max((d.val/maxVal)*100,4)}%;background:linear-gradient(180deg,var(--accent),#2563eb)"></div>
-      <span class="bar-label">${d.label}</span>
-    </div>`).join('');
-
-  // Category breakdown
-  const catBreak = document.getElementById('cat-breakdown');
-  const catTotals = {};
-  thisMonth.forEach(e=>{ catTotals[e.cat]=(catTotals[e.cat]||0)+e.amount; });
-  const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
-  const maxCat = sortedCats[0]?.[1] || 1;
-  const catColors = { food:'#4f8eff', travel:'#3dffa0', books:'#ffb84f', cafe:'#ff4f8e', grocery:'#a78bfa', health:'#34d399', fun:'#f59e0b', other:'#6b7280' };
-  catBreak.innerHTML = sortedCats.length ? sortedCats.map(([id,val])=>{
-    const cat = CATEGORIES.find(c=>c.id===id)||CATEGORIES[7];
-    return `<div class="cat-row">
-      <div class="cat-row-icon">${cat.icon}</div>
-      <div class="cat-row-info">
-        <div class="cat-row-name">${cat.label}</div>
-        <div class="cat-row-bar-wrap"><div class="cat-row-bar" style="width:${(val/maxCat)*100}%;background:${catColors[id]||'#4f8eff'}"></div></div>
-      </div>
-      <div class="cat-row-amt" style="color:${catColors[id]||'#4f8eff'}">₹${val}</div>
-    </div>`;
-  }).join('') : '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">No expense data this month</div>';
-}
-
-// ══════════════════════════════════════════
-// SETTINGS
-// ══════════════════════════════════════════
-function renderProfileCard() {
-  const u = currentUser;
-  const catalog = u.batch==='2025-27' ? TERM_III_SUBJECTS : TERM_VI_SUBJECTS;
-  const subNames = (u.subjects||[]).map(code=>{
-    const sub = catalog.find(s=>s.code===code);
-    return sub ? `${code} — ${sub.name}` : code;
-  });
-  document.getElementById('profile-card').innerHTML = `
-    <div class="batch-info-row"><span class="batch-info-key">Name</span><span class="batch-info-val">${u.name}</span></div>
-    <div class="batch-info-row"><span class="batch-info-key">Batch</span><span class="batch-info-val">PGDM ${u.batch}</span></div>
-    <div class="batch-info-row"><span class="batch-info-key">Section</span><span class="batch-info-val">Section ${u.section}</span></div>
-    ${subNames.length ? `<div class="batch-info-row" style="flex-direction:column;align-items:flex-start;gap:6px">
-      <span class="batch-info-key">Your Subjects</span>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${subNames.map(s=>`<span style="background:var(--surface3);border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600">${s}</span>`).join('')}</div>
-    </div>` : ''}`;
-}
-
-function toggleAutoRefresh() {
-  const tog = document.getElementById('refresh-toggle');
-  if (tog.checked) { autoRefreshTimer = setInterval(fetchTimetable, 30*60*1000); }
-  else { clearInterval(autoRefreshTimer); }
-}
-
-// ══════════════════════════════════════════
-// UI HELPERS
-// ══════════════════════════════════════════
-function switchTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+tab));
-  if (tab==='analytics') renderAnalytics();
-  if (tab==='monthly') renderMonthly();
-  if (tab==='admin') renderAdminPanel();
-}
-
-function animateRefreshBar() {
-  const bar = document.getElementById('refresh-prog');
-  let w = 0;
-  const interval = setInterval(()=>{ w+=0.056; bar.style.width=Math.min(w,100)+'%'; if(w>=100){clearInterval(interval);setTimeout(()=>{bar.style.width='0%';},500);} }, 1000);
-  setInterval(()=>{ w=0; bar.style.width='0%'; const i=setInterval(()=>{ w+=0.056; bar.style.width=Math.min(w,100)+'%'; if(w>=100){clearInterval(i);setTimeout(()=>{bar.style.width='0%';},500);} },1000); }, 30*60*1000+2000);
-}
-
-
-// ══════════════════════════════════════════
-// MONTHLY TIMETABLE
-// ══════════════════════════════════════════
-let monthOffset = 0;
-
-function changeMonth(dir) {
-  monthOffset += dir;
-  renderMonthly();
-}
-
-function parseSlotEntry_OLD(raw) {
-  // Parse a slot entry like "MK609 (CR6)", "OB621(CR6)", "ST509(A)(A)", "MK623/FN648"
-  // Returns { code, venueOverride }
-  if (!raw) return null;
-  raw = raw.trim();
-
-  // Venue override: code followed by space+(ROOM) e.g. "MK609 (CR6)"
-  const spaceVenueMatch = raw.match(/^([A-Z0-9/\-]+(?:\([A-Z0-9]+\))?(?:\([A-Z0-9]+\))?)\s+\(([A-Z0-9]+)\)$/);
-  if (spaceVenueMatch) return { code: spaceVenueMatch[1].trim(), venueOverride: spaceVenueMatch[2] };
-
-  // Trailing (ROOM) where ROOM looks like CR6, CL3, CR1 etc — NOT a section letter alone
-  const trailingRoomMatch = raw.match(/^(.+?)\(([A-Z]{2,}[0-9]+)\)$/);
-  if (trailingRoomMatch) return { code: trailingRoomMatch[1].trim(), venueOverride: trailingRoomMatch[2] };
-
-  return { code: raw, venueOverride: null };
-}
-
-function parseSlotEntry(raw) {
-  // Handles all sheet patterns:
-  // "MK609 (CR6)"        → code=MK609, venue=CR6
-  // "OB621(CR6)"         → code=OB621, venue=CR6
-  // "MK609"              → code=MK609, venue=from map
-  // "IS-608(A)"          → code=IS-608, section=(A) — NOT a venue
-  // "ST509(A)(A)"        → code=ST509(A), section=(A)
-  // "MK623(A)/FN648"     → handled by caller splitting on /
-  // "Tutorial Room" and "CR1/CR2/CR5/CR6/CL1/CL3/CL2" are venue tokens
-  if (!raw) return null;
-  raw = raw.trim();
-
-  const ROOM_PATTERN = /^(CR[0-9]+|CL[0-9]+|Tutorial Room|TR)$/i;
-
-  // "CODE (ROOM)" — space before paren
-  const spaceRoom = raw.match(/^([^\s(]+(?:\([^)]+\))*)\s+\(([^)]+)\)$/);
-  if (spaceRoom && ROOM_PATTERN.test(spaceRoom[2])) {
-    return { code: spaceRoom[1].trim(), venueOverride: spaceRoom[2] };
-  }
-
-  // "CODE(ROOM)" — no space, room pattern
-  const noSpaceRoom = raw.match(/^([A-Z0-9\-]+(?:\([A-Z]+\))?)\(([A-Z]{2}[0-9]+)\)$/);
-  if (noSpaceRoom && ROOM_PATTERN.test(noSpaceRoom[2])) {
-    return { code: noSpaceRoom[1].trim(), venueOverride: noSpaceRoom[2] };
-  }
-
-  // Trailing space + "Tutorial Room"
-  const trTutorial = raw.match(/^(.+?)\s+\(?(Tutorial Room)\)?$/i);
-  if (trTutorial) return { code: trTutorial[1].trim(), venueOverride: 'Tutorial Room' };
-
-  // No venue override — return as-is
-  return { code: raw, venueOverride: null };
-}
-
-function resolveVenue(codeBase, section, venueOverride) {
-  if (venueOverride) return venueOverride;
-  const key = VENUE_MAP[codeBase]
-    || VENUE_MAP[Object.keys(VENUE_MAP).find(k => codeBase.startsWith(k)) || ''];
-  return key ? (key[section] || 'TBA') : 'TBA';
-}
-
-function getClassesForDate(dateStr) {
-  const b = currentUser.batch, sec = currentUser.section;
-  const subs = currentUser.subjects || [];
-  const match = timetableData.find(e =>
-    e.batch === b && e.section === sec && e.date && e.date.toDateString() === dateStr
-  );
-  if (!match) return [];
-  const slots = b === '2025-27' ? SLOTS_2025_27 : SLOTS_2024_26;
-  const catalog = b === '2025-27' ? TERM_III_SUBJECTS : TERM_VI_SUBJECTS;
-  const classes = [];
-
-  slots.forEach(slot => {
-    if (slot.isLunch) return;
-    const rawCode = match.slots[slot.slot];
-    if (!rawCode) return;
-
-    // For combined slots like "MK623/FN648", check if any of user's subjects match
-    const parts = rawCode.split('/');
-
-    let chosenCode = rawCode;
-    let chosenVenueOverride = null;
-
-    if (b === '2024-26' && subs.length > 0) {
-      // Find which of user's selected subjects appears in this slot
-      let found = false;
-      for (const part of parts) {
-        const parsed = parseSlotEntry(part);
-        if (!parsed) continue;
-        // Strip trailing section like (A),(B),(C) to get base code
-        const codeStripped = parsed.code.replace(/\([A-C]\)$/, '').trim();
-        const userMatch = subs.find(sc => {
-          const scBase = sc.replace(/\([A-C]\)$/, '').trim();
-          return codeStripped === scBase || codeStripped.startsWith(scBase) || scBase.startsWith(codeStripped);
-        });
-        if (userMatch) {
-          chosenCode = parsed.code;
-          chosenVenueOverride = parsed.venueOverride;
-          found = true;
-          break;
-        }
-      }
-      if (!found) return; // none of user's subjects in this slot
-    } else {
-      // For 2025-27 or no basket selected — just parse venue override from raw
-      const parsed = parseSlotEntry(rawCode.split('/')[0]);
-      if (parsed) { chosenCode = parsed.code; chosenVenueOverride = parsed.venueOverride; }
-    }
-
-    // Strip section suffix like (A),(B),(C) for catalog lookup
-    const codeBase = chosenCode.replace(/\([A-C]\)$/, '').trim();
-    const subInfo = catalog.find(s => s.code === codeBase || codeBase.startsWith(s.code));
-    const subjectName = subInfo ? subInfo.name : codeBase;
-    const venue = resolveVenueWithOverride(match, slot.slot, codeBase, sec, chosenVenueOverride);
-
-    classes.push({ ...slot, code: codeBase, name: subjectName, venue, slot: slot.slot });
-  });
-  return classes;
-}
-
-function renderMonthly() {
-  const wrap = document.getElementById('monthly-wrap');
-  const now = new Date();
-  const target = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
-  const month = target.getMonth();
-  const year = target.getFullYear();
-  document.getElementById('month-label').textContent =
-    target.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayStr = now.toDateString();
-  const sheetUrl = `https://docs.google.com/spreadsheets/d/1IOCuN6iHKFGMc7Lrej56miU3w6ZVRL0IG2a3RT2kra4/edit`;
-
-  // Official sheet link banner
-  let html = `<div style="background:rgba(79,142,255,.07);border:1px solid rgba(79,142,255,.2);border-radius:10px;
-    padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-    <div>
-      <div style="font-size:12px;font-weight:700;color:var(--accent)">📋 Official Timetable</div>
-      <div style="font-size:11px;color:var(--muted)">Cross-check any class against the institute's master schedule</div>
-    </div>
-    <a href="${sheetUrl}" target="_blank" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:8px;
-      font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">Open Official Sheet ↗</a>
-  </div>`;
-
-  html += '<div style="display:flex;flex-direction:column;gap:10px">';
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
-    const dateStr = date.toDateString();
-    const isToday = dateStr === todayStr;
-    const isPast = date < new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const classes = getClassesForDate(dateStr);
-    const isSunday = date.getDay() === 0;
-
-    // Skip empty Sundays and empty weekdays that are clearly holidays/breaks
-    if (classes.length === 0 && isSunday) continue;
-
-    const dateLabel = date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    const slots_def = currentUser.batch === '2025-27' ? SLOTS_2025_27 : SLOTS_2024_26;
-
-    html += `<div style="background:var(--surface);border:1px solid ${isToday ? 'rgba(79,142,255,.4)' : 'var(--border)'};
-      border-radius:12px;overflow:hidden;opacity:${isPast ? '.6' : '1'}">
-
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;
-        background:${isToday ? 'rgba(79,142,255,.08)' : 'var(--surface2)'};
-        border-bottom:1px solid ${classes.length > 0 ? 'var(--border)' : 'transparent'}">
-        <div style="font-size:14px;font-weight:800;flex:1;${isToday ? 'color:var(--accent)' : ''}">${dateLabel}</div>
-        ${isToday ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px">TODAY</span>' : ''}
-        ${classes.length > 0
-          ? `<span style="font-size:11px;color:var(--muted);font-weight:600">${classes.length} class${classes.length > 1 ? 'es' : ''}</span>`
-          : `<span style="font-size:11px;color:var(--muted)">No classes scheduled</span>`}
-        <a href="${sheetUrl}" target="_blank" style="font-size:10px;color:var(--accent);text-decoration:none;font-weight:700;
-          background:rgba(79,142,255,.1);padding:2px 7px;border-radius:5px;white-space:nowrap">Verify ↗</a>
-      </div>`;
-
-    if (classes.length > 0) {
-      // Full timeline for the day
-      html += '<div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">';
-      classes.forEach((cls, idx) => {
-        const slotDef = slots_def.find(s => !s.isLunch && s.slot === cls.slot);
-        const accentColors = ['#4f8eff','#3dffa0','#ffb84f','#ff4f8e','#a78bfa','#34d399'];
-        const col = accentColors[idx % accentColors.length];
-        // Check if this entry has an admin-applied correction
-        const entryForDate = timetableData.find(e =>
-          e.batch === currentUser.batch && e.section === currentUser.section &&
-          e.date && e.date.toDateString() === dateStr
-        );
-        const hasCorrection = entryForDate && entryForDate.venueOverrides && entryForDate.venueOverrides[cls.slot];
-        const correctionBadge = hasCorrection ? `<span class="correction-badge">✓ Corrected</span>` : '';
-
-        html += `<div style="display:flex;align-items:stretch;gap:12px;background:var(--surface2);
-          border:1px solid var(--border);border-left:3px solid ${col};border-radius:8px;padding:10px 14px">
-          <div style="min-width:90px;flex-shrink:0">
-            <div style="font-size:12px;font-weight:800;color:${col}">${cls.start}</div>
-            <div style="font-size:10px;color:var(--muted)">to ${cls.end}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">Slot ${cls.slot}</div>
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:800;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-              ${cls.name}${correctionBadge}
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-              <span style="font-size:11px;color:var(--muted)">📋 ${cls.code}</span>
-              <span style="font-size:11px;color:var(--muted)">🏛️ ${cls.venue}</span>
-              <button class="report-btn" onclick="openReportModal('${dateStr}','${cls.slot}','${cls.code}','${cls.name.replace(/'/g,"\'")}','${cls.venue}','${cls.start}')">
-                🚩 Report Issue
-              </button>
-            </div>
-          </div>
-        </div>`;
-      });
-
-      // Lunch break removed per user request
-      html += '</div>';
-    }
-    html += '</div>';
-  }
-
-  html += '</div>';
-  wrap.innerHTML = html;
-}
-
-// ══════════════════════════════════════════
-// SMS WEBHOOK LISTENER
-// ══════════════════════════════════════════
-function initWebhook() {
-  // Display webhook URL (this page's URL + ?sms=...)
-  const base = window.location.href.split('?')[0];
-  const url = base + '?sms={AMOUNT}&src={SOURCE}';
-  const els = ['webhook-display', 'webhook-display-ios', 'webhook-url-android'];
-  els.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = url; });
-
-  // Listen for SMS param on page load / URL change
-  checkURLForSMS();
-}
-
-function checkURLForSMS() {
-  const params = new URLSearchParams(window.location.search);
-  const smsRaw = params.get('sms');
-  const src = params.get('src') || 'SMS';
-  if (smsRaw) {
-    const parsed = parseSMSText(decodeURIComponent(smsRaw), src);
-    if (parsed) {
-      setTimeout(() => triggerAIPopup(parsed.amount, parsed.source, parsed.merchant), 800);
-    }
-    // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-}
-
-function parseSMSText(text, defaultSrc) {
-  // Match common Indian payment SMS patterns
-  const amountMatch = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?)/i)
-    || text.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:Rs\.?|INR|₹)/i)
-    || text.match(/(?:payment of|paid|debited|credited)\s+(?:Rs\.?|INR|₹)?\s*([\d,]+(?:\.\d{1,2})?)/i);
-
-  if (!amountMatch) return null;
-  const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
-
-  let source = defaultSrc;
-  if (/gpay|google pay/i.test(text)) source = 'GPay';
-  else if (/phonepe/i.test(text)) source = 'PhonePe';
-  else if (/paytm/i.test(text)) source = 'Paytm';
-  else if (/hdfc/i.test(text)) source = 'HDFC';
-  else if (/icici/i.test(text)) source = 'ICICI';
-  else if (/sbi/i.test(text)) source = 'SBI';
-  else if (/axis/i.test(text)) source = 'Axis';
-
-  const merchantMatch = text.match(/(?:to|at|for)\s+([A-Za-z][A-Za-z0-9 &']{2,30}?)(?:\.|,|$|\s+(?:Ref|Txn|UPI))/i);
-  const merchant = merchantMatch ? merchantMatch[1].trim() : source;
-
-  return { amount, source, merchant };
-}
-
-function triggerAIPopup(amount, source, merchant) {
-  pendingAIExpense = { amount, source, merchant };
-  document.getElementById('popup-amount').textContent = '₹' + amount;
-  document.getElementById('popup-source').textContent = 'via ' + source;
-  document.getElementById('popup-merchant').textContent = merchant;
-  document.getElementById('ai-desc-input').value = '';
-  document.getElementById('ai-popup').classList.add('show');
-  // Switch to expenses tab so user sees context
-  switchTab('expenses');
-  setTimeout(() => document.getElementById('ai-desc-input').focus(), 400);
-}
-
-function showSMSTab(tab) {
-  document.getElementById('sms-android').style.display = tab === 'android' ? 'block' : 'none';
-  document.getElementById('sms-ios').style.display = tab === 'ios' ? 'block' : 'none';
-  document.getElementById('android-tab-btn').style.borderColor = tab === 'android' ? 'var(--accent)' : '';
-  document.getElementById('android-tab-btn').style.color = tab === 'android' ? 'var(--accent)' : '';
-  document.getElementById('ios-tab-btn').style.borderColor = tab === 'ios' ? 'var(--accent)' : '';
-  document.getElementById('ios-tab-btn').style.color = tab === 'ios' ? 'var(--accent)' : '';
-}
-
-function copyWebhook() {
-  const url = document.getElementById('webhook-display')?.textContent || '';
-  navigator.clipboard.writeText(url).then(() => {
-    alert('Webhook URL copied! Paste it into MacroDroid / iOS Shortcuts.');
-  }).catch(() => {
-    prompt('Copy this URL:', url);
-  });
-}
-
-
-// ══════════════════════════════════════════
-// CORRECTION SYSTEM
-// ══════════════════════════════════════════
-
-// Storage keys
-function getCorrections()   { return _load('campusai_corrections', []); }
-function saveCorrections(c) { _save('campusai_corrections', c); }
-function getPending()       { return _load('campusai_pending', []); }
-function savePending(p)     { _save('campusai_pending', p); }
-function getAdmins()        { return _load('campusai_admins', {}); }
-function saveAdmins(a)      { _save('campusai_admins', a); }
-
-function isAdmin() {
-  const admins = getAdmins();
-  return !!(currentUser && admins[currentUser.email]);
-}
-
-// Called after login — show admin tab if user is admin
-function updateAdminUI() {
-  const adminBtn = document.getElementById('admin-tab-btn');
-  const pill = document.getElementById('admin-pill');
-  if (isAdmin()) {
-    adminBtn.style.display = 'flex';
-    const pending = getPending().filter(r => r.status === 'pending');
-    if (pending.length > 0) {
-      pill.style.display = 'inline-block';
-      pill.textContent = pending.length;
-    } else {
-      pill.style.display = 'none';
-    }
-  } else {
-    adminBtn.style.display = 'none';
-    pill.style.display = 'none';
-  }
-}
-
-// ── REPORT FLOW ──
-let pendingReport = null;
-
-function openReportModal(dateStr, slotKey, subjectCode, subjectName, currentVenue, currentTime) {
-  pendingReport = { dateStr, slotKey, subjectCode, subjectName, currentVenue, currentTime };
-  const ctx = `${subjectName} (${subjectCode}) · ${dateStr}`;
-  document.getElementById('report-context').textContent = ctx;
-  document.getElementById('report-type').value = '';
-  document.getElementById('report-fields').style.display = 'none';
-  document.getElementById('ai-thinking').classList.remove('show');
-  document.getElementById('ai-result').classList.remove('show');
-  document.getElementById('report-current').value = '';
-  document.getElementById('report-correct').value = '';
-  document.getElementById('report-note').value = '';
-  document.getElementById('report-modal').classList.remove('hidden');
-}
-
-function closeReportModal() {
-  document.getElementById('report-modal').classList.add('hidden');
-  pendingReport = null;
-}
-
-function onReportTypeChange() {
-  const type = document.getElementById('report-type').value;
-  if (!type || !pendingReport) return;
-  const fields = document.getElementById('report-fields');
-  const currentEl = document.getElementById('report-current');
-  const correctEl = document.getElementById('report-correct');
-  fields.style.display = 'block';
-  document.getElementById('ai-result').classList.remove('show');
-
-  switch(type) {
-    case 'wrong_venue':
-      currentEl.value = pendingReport.currentVenue || 'TBA';
-      correctEl.placeholder = 'e.g. CR6, CR1, Tutorial Room, CL3';
-      document.getElementById('field-current-wrap').style.display = 'block';
-      document.getElementById('field-correct-wrap').style.display = 'block';
-      break;
-    case 'wrong_subject':
-      currentEl.value = pendingReport.subjectCode;
-      correctEl.placeholder = 'e.g. MK621, FN649, IS-608';
-      document.getElementById('field-current-wrap').style.display = 'block';
-      document.getElementById('field-correct-wrap').style.display = 'block';
-      break;
-    case 'wrong_time':
-      currentEl.value = pendingReport.currentTime || 'Current slot';
-      correctEl.placeholder = 'e.g. 09:00, 14:30 or Slot II';
-      document.getElementById('field-current-wrap').style.display = 'block';
-      document.getElementById('field-correct-wrap').style.display = 'block';
-      break;
-    case 'class_cancelled':
-      currentEl.value = pendingReport.subjectName;
-      document.getElementById('field-current-wrap').style.display = 'block';
-      document.getElementById('field-correct-wrap').style.display = 'none';
-      document.getElementById('report-correct').value = 'CANCELLED';
-      break;
-    case 'extra_class':
-      document.getElementById('field-current-wrap').style.display = 'none';
-      currentEl.value = '';
-      correctEl.placeholder = 'Subject code e.g. MK621, and slot e.g. Slot III';
-      document.getElementById('field-correct-wrap').style.display = 'block';
-      break;
-  }
-}
-
-async function submitReport() {
-  const type = document.getElementById('report-type').value;
-  const correct = document.getElementById('report-correct').value.trim();
-  const note = document.getElementById('report-note').value.trim();
-  if (!type) { alert('Please select an issue type.'); return; }
-  if (!correct && type !== 'class_cancelled') { alert('Please enter the correct value.'); return; }
-  if (!pendingReport) return;
-
-  // Show AI thinking
-  const thinking = document.getElementById('ai-thinking');
-  const result = document.getElementById('ai-result');
-  thinking.classList.add('show');
-  result.classList.remove('show');
-  document.getElementById('submit-report-btn').disabled = true;
-
-  try {
-    const verdict = await aiValidateCorrection(type, pendingReport, correct, note);
-    thinking.classList.remove('show');
-    result.classList.add('show');
-
-    if (verdict.valid) {
-      result.className = 'ai-result show valid';
-      result.innerHTML = `<strong>✅ AI Validated:</strong> ${verdict.message}`;
-      // Save to pending queue
-      const pending = getPending();
-      const report = {
-        id: Date.now(),
-        reportedBy: currentUser.email,
-        reporterName: currentUser.name,
-        batch: currentUser.batch,
-        section: currentUser.section,
-        dateStr: pendingReport.dateStr,
-        slotKey: pendingReport.slotKey,
-        subjectCode: pendingReport.subjectCode,
-        subjectName: pendingReport.subjectName,
-        type,
-        currentVal: document.getElementById('report-current').value,
-        correctVal: correct,
-        note,
-        aiVerdict: verdict.message,
-        submittedAt: new Date().toISOString(),
-        status: 'pending'
-      };
-      pending.push(report);
-      savePending(pending);
-      updateAdminUI();
-      setTimeout(() => {
-        closeReportModal();
-        showToast('✅ Report submitted! An admin will review it shortly.');
-      }, 1500);
-    } else {
-      result.className = 'ai-result show invalid';
-      result.innerHTML = `<strong>⚠️ AI flagged an issue:</strong> ${verdict.message}<br><small style="opacity:.7">You can still submit if you're sure — add a note explaining why.</small>`;
-      document.getElementById('submit-report-btn').disabled = false;
-      document.getElementById('submit-report-btn').textContent = 'Submit Anyway →';
-    }
-  } catch(e) {
-    thinking.classList.remove('show');
-    result.className = 'ai-result show invalid';
-    result.innerHTML = '⚠️ AI validation unavailable. Your report will still be submitted for admin review.';
-    result.classList.add('show');
-    document.getElementById('submit-report-btn').disabled = false;
-  }
-}
-
-async function aiValidateCorrection(type, report, correctVal, note) {
-  const catalog = report.batch === '2025-27' ? TERM_III_SUBJECTS : TERM_VI_SUBJECTS;
-  const knownRooms = ['CR1','CR2','CR3','CR4','CR5','CR6','CL1','CL2','CL3','Tutorial Room','TR'];
-  const knownCodes = catalog.map(s => s.code);
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: `You are validating a timetable correction report for a PGDM college.
-
-Report details:
-- Batch: PGDM ${report.batch}, Section ${report.section}
-- Date: ${report.dateStr}
-- Subject: ${report.subjectName} (${report.subjectCode})
-- Issue type: ${type}
-- Current value: ${document.getElementById('report-current').value}
-- Proposed correction: ${correctVal}
-- Student note: ${note || 'none'}
-
-Known subject codes for this batch: ${knownCodes.join(', ')}
-Known room codes: ${knownRooms.join(', ')}
-
-Validate this correction. Reply with JSON only: {"valid": true/false, "message": "short explanation under 30 words"}
-Be lenient — if the correction seems plausible, mark valid. Only reject if clearly nonsensical.`
-        }]
-      })
+    setContent('mindmap', mmHtml || `<pre style="color:var(--muted);font-size:12px">${mindmapRaw}</pre>`);
+
+  } catch(err) {
+    console.error(err);
+    ['eli5-body','academic-body','practical-body'].forEach(id => {
+      setContent(id, `<div style="color:var(--muted);font-size:13px">⚠️ Error loading. Please try again.</div>`);
     });
-    const data = await resp.json();
-    const text = data.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch(e) {
-    // Fallback local validation when API is unavailable
-    if (type === 'wrong_venue') {
-      const upperVal = correctVal.toUpperCase().trim();
-      const isValid = knownRooms.some(r => upperVal === r.toUpperCase() || upperVal.includes(r.toUpperCase()));
-      return {
-        valid: isValid,
-        message: isValid
-          ? 'Room code looks valid based on known classrooms.'
-          : 'Room code not recognised. Known rooms: ' + knownRooms.join(', ')
-      };
-    }
-    if (type === 'wrong_subject') {
-      const upper = correctVal.toUpperCase().split('(')[0].trim();
-      const isValid = knownCodes.some(c => upper === c || upper.startsWith(c) || c.startsWith(upper));
-      return {
-        valid: isValid,
-        message: isValid
-          ? 'Subject code found in course catalog.'
-          : 'Subject code not found for PGDM ' + report.batch + '. Valid codes: ' + knownCodes.join(', ')
-      };
-    }
-    if (type === 'class_cancelled') {
-      return { valid: true, message: 'Class cancellation noted — admin will verify.' };
-    }
-    if (type === 'extra_class') {
-      return { valid: correctVal.trim().length > 2, message: 'Extra class details provided for admin review.' };
-    }
-    return { valid: true, message: 'Unable to auto-validate — submitted for admin review.' };
-  }
-}
-
-// ── ADMIN PANEL ──
-function renderAdminPanel() {
-  const wrap = document.getElementById('correction-queue-wrap');
-  const pending = getPending().filter(r => r.status === 'pending');
-  const approved = getCorrections();
-
-  if (pending.length === 0) {
-    wrap.innerHTML = `
-      <div class="empty-queue">
-        <div style="font-size:40px;margin-bottom:10px">✅</div>
-        <div style="font-weight:700;font-size:16px">Queue is clear!</div>
-        <div style="font-size:13px;margin-top:4px;color:var(--muted)">No pending corrections to review</div>
-      </div>
-      ${approved.length > 0 ? `<div style="margin-top:20px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">
-          ${approved.length} Applied Correction${approved.length > 1 ? 's' : ''}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          ${approved.map(c => `
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;
-              display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-              <div>
-                <span style="font-size:12px;font-weight:700;color:var(--green)">✓ Applied</span>
-                <span style="font-size:12px;color:var(--muted);margin-left:8px">${c.dateStr} · ${c.subjectCode} · ${c.type.replace('_',' ')}</span>
-              </div>
-              <button onclick="revokeCorrection(${c.id})" style="background:transparent;border:1px solid var(--border);
-                color:var(--muted);padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer;
-                font-family:'Cabinet Grotesk',sans-serif">Revoke</button>
-            </div>`).join('')}
-        </div>
-      </div>` : ''}
-    `;
-    return;
   }
 
-  wrap.innerHTML = `
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;font-weight:600">
-      ${pending.length} correction${pending.length > 1 ? 's' : ''} awaiting review
-    </div>
-    <div class="correction-queue">
-      ${pending.map(r => `
-        <div class="correction-item">
-          <div class="ci-header">
-            <span class="ci-date">${new Date(r.dateStr).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}</span>
-            <span class="ci-batch">PGDM ${r.batch} · Sec ${r.section}</span>
-            <span class="pending-badge">⏳ Pending</span>
-            <span class="ci-reporter">by ${r.reporterName}</span>
-          </div>
-          <div class="ci-body">
-            <div class="ci-row">
-              <span class="ci-label">Subject</span>
-              <span class="ci-val">${r.subjectName} <span style="color:var(--muted)">(${r.subjectCode})</span></span>
-            </div>
-            <div class="ci-row">
-              <span class="ci-label">Issue</span>
-              <span class="ci-val" style="text-transform:capitalize">${r.type.replace(/_/g,' ')}</span>
-            </div>
-            <div class="ci-row">
-              <span class="ci-label">Change</span>
-              <span class="ci-val">
-                <span class="ci-old">${r.currentVal || '—'}</span>
-                <span style="color:var(--muted);margin:0 6px">→</span>
-                <span class="ci-new">${r.correctVal}</span>
-              </span>
-            </div>
-            ${r.note ? `<div class="ci-row"><span class="ci-label">Note</span><span class="ci-note">${r.note}</span></div>` : ''}
-            ${r.aiVerdict ? `<div class="ci-ai-verdict">🤖 AI: ${r.aiVerdict}</div>` : ''}
-            <div class="ci-actions">
-              <button class="ci-approve" onclick="approveCorrection(${r.id})">✅ Approve & Apply</button>
-              <button class="ci-reject" onclick="rejectCorrection(${r.id})">✕ Reject</button>
-            </div>
-          </div>
-        </div>`).join('')}
-    </div>
-  `;
+  btn.disabled = false;
+  btn.classList.remove('loading');
+  btn.querySelector('.btn-text').textContent = '✦ Analyze Again';
 }
 
-function approveCorrection(id) {
-  const pending = getPending();
-  const idx = pending.findIndex(r => r.id === id);
-  if (idx === -1) return;
-  const report = pending[idx];
-
-  // Apply the correction to timetableData
-  applyCorrection(report);
-
-  // Move to approved list
-  report.status = 'approved';
-  report.approvedBy = currentUser.email;
-  report.approvedAt = new Date().toISOString();
-  const corrections = getCorrections();
-  corrections.push(report);
-  saveCorrections(corrections);
-
-  // Remove from pending
-  pending.splice(idx, 1);
-  savePending(pending);
-
-  updateAdminUI();
-  renderAdminPanel();
-  renderTimeline();
-  renderMonthly();
-  showToast('✅ Correction applied and saved!');
-}
-
-function rejectCorrection(id) {
-  const pending = getPending();
-  const idx = pending.findIndex(r => r.id === id);
-  if (idx === -1) return;
-  pending[idx].status = 'rejected';
-  // Remove from queue
-  pending.splice(idx, 1);
-  savePending(pending);
-  updateAdminUI();
-  renderAdminPanel();
-  showToast('❌ Report rejected.');
-}
-
-function revokeCorrection(id) {
-  if (!confirm('Revoke this correction? The original data will be restored.')) return;
-  const corrections = getCorrections().filter(c => c.id !== id);
-  saveCorrections(corrections);
-  // Reload hardcoded data + re-apply remaining corrections
-  timetableData = buildHardcodedData();
-  corrections.forEach(c => applyCorrection(c));
-  renderTimeline();
-  renderMonthly();
-  renderAdminPanel();
-  showToast('↩️ Correction revoked.');
-}
-
-function applyCorrection(report) {
-  // Find the matching timetable entry and mutate it
-  const entry = timetableData.find(e =>
-    e.batch === report.batch &&
-    e.section === report.section &&
-    e.date && e.date.toDateString() === new Date(report.dateStr).toDateString()
-  );
-  if (!entry) return;
-
-  switch(report.type) {
-    case 'wrong_venue':
-      // Store venue override — we'll check corrections at render time
-      if (!entry.venueOverrides) entry.venueOverrides = {};
-      entry.venueOverrides[report.slotKey] = report.correctVal;
-      break;
-    case 'wrong_subject':
-      if (entry.slots[report.slotKey]) {
-        entry.slots[report.slotKey] = report.correctVal;
-      }
-      break;
-    case 'class_cancelled':
-      delete entry.slots[report.slotKey];
-      break;
-    case 'extra_class':
-      // correctVal should be "CODE SLOT" e.g. "MK621 III"
-      const parts = report.correctVal.split(' ');
-      if (parts.length >= 2) entry.slots[parts[1]] = parts[0];
-      else entry.slots['VI'] = report.correctVal; // fallback
-      break;
-  }
-}
-
-// Patch resolveVenue to check entry-level overrides
-function resolveVenueWithOverride(entry, slotKey, codeBase, section, venueOverride) {
-  // Check admin-approved overrides first
-  if (entry && entry.venueOverrides && entry.venueOverrides[slotKey]) {
-    return entry.venueOverrides[slotKey];
-  }
-  if (venueOverride) return venueOverride;
-  const key = VENUE_MAP[codeBase]
-    || VENUE_MAP[Object.keys(VENUE_MAP).find(k => codeBase.startsWith(k)) || ''];
-  return key ? (key[section] || 'TBA') : 'TBA';
-}
-
-// ── ADMIN MANAGEMENT ──
-function promoteAdmin() {
-  const email = document.getElementById('promote-email').value.trim().toLowerCase();
-  const role = document.getElementById('promote-role').value.trim();
-  const errEl = document.getElementById('promote-error');
-  errEl.style.display = 'none';
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showError(errEl, 'Please enter a valid email.'); return;
-  }
-  const users = getUsers();
-  if (!users[email]) { showError(errEl, 'No account found with this email. They must sign up first.'); return; }
-  const admins = getAdmins();
-  admins[email] = { role: role || 'Admin', grantedBy: currentUser.email, grantedAt: new Date().toISOString() };
-  saveAdmins(admins);
-  document.getElementById('promote-modal').classList.add('hidden');
-  showToast(`👑 ${email} is now an admin!`);
-  renderAdminManagement();
-}
-
-function revokeAdmin(email) {
-  if (email === currentUser.email) { alert("You can't revoke your own admin access."); return; }
-  const admins = getAdmins();
-  delete admins[email];
-  saveAdmins(admins);
-  renderAdminManagement();
-  showToast('Admin access revoked.');
-}
-
-function renderAdminManagement() {
-  const wrap = document.getElementById('admin-mgmt-wrap');
-  if (!wrap) return;
-  const admins = getAdmins();
-  const entries = Object.entries(admins);
-  if (entries.length === 0) {
-    wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No admins set yet.</div>';
-    return;
-  }
-  wrap.innerHTML = entries.map(([email, info]) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;
-      border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-size:13px;font-weight:700">${email}</div>
-        <div style="font-size:11px;color:var(--muted)">${info.role}</div>
-      </div>
-      ${email !== currentUser?.email ? `<button onclick="revokeAdmin('${email}')" class="btn-sm"
-        style="border-color:var(--pink);color:var(--pink)">Revoke</button>` : '<span style="font-size:11px;color:var(--accent)">You</span>'}
-    </div>`).join('');
-}
-
-// ── TOAST ──
-function showToast(msg) {
-  let toast = document.getElementById('campusai-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'campusai-toast';
-    toast.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-      background:var(--surface);border:1px solid var(--border2);border-radius:10px;
-      padding:10px 18px;font-size:13px;font-weight:600;z-index:1000;
-      box-shadow:0 8px 30px rgba(0,0,0,.4);white-space:nowrap;`;
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
-}
-
-// Re-apply all saved corrections on app load
-function reapplyCorrections() {
-  const corrections = getCorrections();
-  corrections.forEach(c => applyCorrection(c));
-}
-
-// ══════════════════════════════════════════
-// BOOT
-// ══════════════════════════════════════════
-(function boot() {
-  const saved = loadCurrentUser();
-  if (saved) { currentUser = saved; loginUser(saved); }
-})();
+// Allow Ctrl+Enter to submit
+document.getElementById('topic-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) analyze();
+});
 </script>
 </body>
 </html>
